@@ -1,0 +1,35 @@
+id: 01-setup
+title: Project Setup and Config Parser
+epic: test-epic
+status: pending
+priority: critical
+phase: 0
+
+dependencies: []
+
+skills_required:
+  - python
+  - docker
+
+files_to_touch:
+  - src/config.py
+  - Dockerfile
+
+acceptance_criteria:
+  - "[ ] Config parser reads YAML files"
+  - "[ ] Docker container builds successfully"
+
+description: |
+  ## Objective
+  Set up the project structure and implement the configuration parser module.
+
+  ## Steps
+  1. Create project directory structure with src/, tests/, and config/ directories
+  2. Implement YAML/JSON config parser in src/config.py
+  3. Create Dockerfile for the service with multi-stage build
+
+  ## Verification
+  ```bash
+  python -c "from src.config import parse; print('OK')"
+  docker build -t config-validator .
+  ```

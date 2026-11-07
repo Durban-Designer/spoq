@@ -1,0 +1,163 @@
+% Validation Framework
+\section{Validation Framework}
+\label{sec:validation}
+
+SPOQ enforces quality through two \textit{validation gates}, structured
+checkpoints where work is scored against explicit criteria before proceeding.
+The first gate, \textit{epic validation}, occurs before execution and assesses
+plan quality. The second, \textit{agent validation}, occurs after execution
+and assesses code quality. Each gate applies 10 metrics, scored 0--100, with
+a 95\% aggregate threshold for passing.
+
+\subsection{Planning Validation: 10 Metrics}
+\label{subsec:planning-validation}
+
+Epic validation assesses whether the plan is sufficiently clear, complete,
+and well-structured to enable successful execution. Table~\ref{tab:planning-metrics}
+summarizes the metrics.
+
+\begin{table}[htbp]
+\centering
+\caption{Epic Validation Metrics}
+\label{tab:planning-metrics}
+\small
+\begin{tabular}{lp{6cm}l}
+\toprule
+\textbf{Metric} & \textbf{Question} & \textbf{Threshold} \\
+\midrule
+Vision Clarity (VC) & Is the epic's goal clearly scoped? & $\geq$90 \\
+Architecture Quality (AQ) & Is the architecture diagram complete? & $\geq$90 \\
+Task Decomposition (TD) & Are tasks atomic and independent? & $\geq$90 \\
+Dependency Graph (DG) & Are dependencies explicit and acyclic? & $\geq$90 \\
+Coverage Completeness (CC) & Do tasks fully cover all success criteria? & $\geq$90 \\
+Phase Ordering (PO) & Do waves maximize parallelism? & $\geq$90 \\
+Scope Coherence (SC) & Do all tasks contribute to the epic goal? & $\geq$90 \\
+Success Criteria Quality (SQ) & Are criteria SMART? & $\geq$90 \\
+Risk Identification (RI) & Are blockers and risks mitigated? & $\geq$90 \\
+Integration Strategy (IS) & Is it clear how tasks merge and verify? & $\geq$90 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Pass Criteria.}
+An epic passes validation if:
+\begin{equation}
+\frac{1}{10}\sum_{i=1}^{10} M_i \geq 95 \quad \land \quad \min_i M_i \geq 90
+\end{equation}
+
+This dual requirement ensures both high average quality and no critically
+weak dimensions. A perfect score on 9 metrics cannot compensate for a
+failing score on the 10th.
+
+\paragraph{Threshold Rationale.}
+The 95/90 planning threshold reflects the cascading cost of planning errors:
+a poorly-structured task creates execution problems that propagate to dependent
+tasks. We observed that plans scoring below 90 on any metric required rework
+in over 50\% of cases, while those scoring above 95 overall experienced less
+than 10\% rework. The minimum threshold of 90 prevents ``averaging out'' a
+critically weak dimension. Appendix~\ref{subsec:threshold-rationale}
+provides additional design rationale.
+
+\paragraph{Rationale: Validate Early.}
+Planning mistakes are cheap to fix but expensive to execute. By enforcing
+rigorous validation before spawning agents, SPOQ prevents wasted computation
+on fundamentally flawed plans.
+
+\newpage
+\subsection{Code Validation: 10 Metrics}
+\label{subsec:code-validation}
+
+Agent validation assesses whether completed work meets quality standards.
+Table~\ref{tab:code-metrics} summarizes the metrics.
+
+\begin{table}[htbp]
+\centering
+\caption{Agent Validation Metrics}
+\label{tab:code-metrics}
+\small
+\begin{tabular}{lp{6cm}l}
+\toprule
+\textbf{Metric} & \textbf{Question} & \textbf{Threshold} \\
+\midrule
+Syntactic Correctness (SC) & Does the code compile without errors? & $\geq$80 \\
+Test Existence (TE) & Does new code have corresponding unit tests? & $\geq$80 \\
+Test Pass Rate (TP) & Do all tests pass? & $\geq$80 \\
+Requirements Fidelity (RF) & Does implementation match task specification? & $\geq$80 \\
+SOLID Adherence (SA) & Does code follow SOLID design principles (Single responsibility, Open/closed, etc.)? & $\geq$80 \\
+Security (SE) & Free from OWASP Top 10 vulnerabilities (injection, auth flaws, etc.)? & $\geq$80 \\
+Error Handling (EH) & Does code handle failures gracefully? & $\geq$80 \\
+Scalability (SL) & Will this code scale appropriately? & $\geq$80 \\
+Code Clarity (CC) & Is code readable and self-documenting? & $\geq$80 \\
+Completeness (CO) & Is work fully finished (no TODOs/stubs)? & $\geq$80 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Pass Criteria.}
+A task passes validation if:
+\begin{equation}
+\frac{1}{10}\sum_{i=1}^{10} M_i \geq 95 \quad \land \quad \min_i M_i \geq 80
+\end{equation}
+
+The per-metric floor is lower (80 vs 90) because code quality inherently
+involves tradeoffs that planning does not.
+
+\paragraph{Code Threshold Rationale.}
+The 95/80 code threshold is more lenient than planning because code can be
+iteratively improved post-delivery, and some metrics (e.g., security edge
+cases) are inherently harder to achieve perfectly. Rework at the code level
+is less expensive than re-planning an entire task decomposition; a failed
+task can be re-executed with targeted feedback, whereas a flawed plan may
+invalidate work across multiple dependent tasks.
+
+\paragraph{Concise Feedback.}
+On failure, the reviewer provides remediation guidance in $\leq$20 lines:
+specific file:line references, concrete issues, and numbered action items.
+This constraint respects the context budget of the orchestrator and forces
+actionable specificity.
+
+\newpage
+\subsection{Validation Cascade}
+\label{subsec:validation-cascade}
+
+SPOQ applies a \textit{validation cascade}, a hierarchical check where the
+overall epic validation incorporates individual task-level assessments.
+Epic validation triggers task-level validation on each constituent task.
+If any individual task scores $<$95, the epic's aggregate score is capped
+at 85, forcing a FAIL verdict.
+
+This prevents ``carrying'' weak tasks on the strength of strong planning.
+Every task must be individually well-specified to pass epic validation.
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    node distance=0.6cm,
+    box/.style={rectangle, draw=spoqnavy, fill=spoqnavy!10, thick,
+                minimum width=3cm, minimum height=0.6cm, align=center, font=\small},
+    check/.style={circle, draw=spoqemerald, fill=spoqemerald!20, thick,
+                  minimum size=0.4cm, inner sep=0pt},
+    fail/.style={circle, draw=spoqburgundy, fill=spoqburgundy!20, thick,
+                 minimum size=0.4cm, inner sep=0pt}
+]
+
+\node[box] (epic) {Epic Validation};
+\node[box, below=of epic] (t1) {Task 01 Validation};
+\node[box, below=of t1] (t2) {Task 02 Validation};
+\node[box, below=of t2] (t3) {Task 03 Validation};
+\node[below=0.3cm of t3, font=\small] (dots) {$\vdots$};
+
+% Scores
+\node[right=0.8cm of t1] (s1) {97 \checkmark};
+\node[right=0.8cm of t2] (s2) {92 \checkmark};
+\node[right=0.8cm of t3, text=spoqburgundy] (s3) {84 $\times$};
+
+% Cascade effect
+\draw[-Stealth, dashed, spoqburgundy] (s3.west) -- ++(-0.3,0) -- ++(0,2.5) -- (epic.east);
+\node[right=1.5cm of epic, text=spoqburgundy, font=\small] {Capped at 85};
+
+\end{tikzpicture}
+\caption{Validation cascade: a single task scoring $<$95 caps the epic's
+overall score, triggering failure.}
+\label{fig:cascade}
+\end{figure}

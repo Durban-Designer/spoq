@@ -1,0 +1,34 @@
+% Abstract
+\begin{abstract}
+Multi-agent AI systems show promise for automating software engineering tasks,
+yet existing approaches suffer from coordination overhead, quality control gaps,
+and limited human oversight. We introduce \textbf{SPOQ} (Specialist Orchestrated
+Queuing), a methodology for multi-agent software development combining three
+innovations: (1) \textit{wave-based topological dispatch} that computes parallel
+execution waves from task dependency graphs; (2) \textit{dual validation gates}
+applying quality metrics before execution (planning validation) and after (code
+validation) to reduce rework cycles; and (3) \textit{Human-as-an-Agent (HaaA)}
+integration, where a human specialist participates in decomposition and can be
+consulted during execution. SPOQ uses a three-tier agent hierarchy (Opus
+workers, Sonnet reviewers, Haiku investigators), each selected to optimize
+cost-quality tradeoffs.
+We evaluate SPOQ along four research questions through controlled benchmarks.
+Experiment~1 measures scheduling efficiency under two regimes: on unbounded
+synthetic DAGs, wave dispatch approaches the critical-path lower bound
+(ratio 1.03--1.11, speedup up to 14.3$\times$); on a 2-slot local backend
+running real LLM calls, it delivers a stable 1.4$\times$ speedup that matches
+the hardware concurrency ceiling. Experiment~2 measures planning quality
+across four full-stack tasks: structured SPOQ planning improves coverage from
+93.0 to 99.75, eliminates cyclic plans, and lifts parallelism potential from
+31.0 to 75.25. Experiment~3 ablates validation gates: dual validation reduces
+defects from 0.34 to 0.20 per task and lifts test pass rate from 91.25\% to
+99.75\%. Experiment~4 evaluates Human-as-Agent planning: human review further
+reduces residual defects from 0.47 to 0.03 per task and raises pass rate from
+96.5\% to 99.75\%. We additionally replicate Experiments~1--4 against a locally
+hosted open-weights model (Qwen3.6-35B-A3B) to verify that the gains are
+attributable to orchestration rather than to any specific model family.
+A longitudinal deployment study across 17 repositories, 8{,}589 commits,
+1{,}822 completed tasks, and 13{,}866 executed tests (99.87\% pass rate)
+provides ecological validation. We discuss failure modes, lessons learned,
+and implications for AI-native software engineering.
+\end{abstract}

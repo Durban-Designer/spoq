@@ -1,0 +1,4 @@
+interface:
+  display_name: "/spoq-validation"
+  short_description: "Review implementation against the quality gate"
+  default_prompt: "Use $spoq-validation on my saved SPOQ work."

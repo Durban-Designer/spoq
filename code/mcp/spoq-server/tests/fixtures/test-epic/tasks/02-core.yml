@@ -1,0 +1,33 @@
+id: 02-core
+title: Web Interface Components
+epic: test-epic
+status: pending
+priority: high
+phase: 0
+
+dependencies: []
+
+skills_required:
+  - react
+  - tailwind
+
+files_to_touch:
+  - src/components/Form.tsx
+
+acceptance_criteria:
+  - "[ ] Upload form renders correctly"
+  - "[ ] Form validates file type before submission"
+
+description: |
+  ## Objective
+  Build the React-based web interface for config file upload and validation.
+
+  ## Steps
+  1. Create Form component with drag-and-drop file upload
+  2. Add client-side validation for YAML and JSON file types
+  3. Style with Tailwind CSS utility classes
+
+  ## Verification
+  ```bash
+  npm test -- --testPathPattern Form
+  ```

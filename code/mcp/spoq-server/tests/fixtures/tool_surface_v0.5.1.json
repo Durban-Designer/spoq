@@ -1,0 +1,550 @@
+{
+  "package": "spoq",
+  "tool_count": 27,
+  "tools": [
+    {
+      "inputSchema": {
+        "properties": {
+          "epic_path": {
+            "title": "Epic Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "epic_path"
+        ],
+        "title": "spoq_analyze_dagArguments",
+        "type": "object"
+      },
+      "name": "spoq_analyze_dag"
+    },
+    {
+      "inputSchema": {
+        "properties": {
+          "map_path": {
+            "title": "Map Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "map_path"
+        ],
+        "title": "spoq_analyze_map_dagArguments",
+        "type": "object"
+      },
+      "name": "spoq_analyze_map_dag"
+    },
+    {
+      "inputSchema": {
+        "properties": {
+          "epic_path": {
+            "title": "Epic Path",
+            "type": "string"
+          },
+          "verbose": {
+            "default": false,
+            "title": "Verbose",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "epic_path"
+        ],
+        "title": "spoq_assign_personasArguments",
+        "type": "object"
+      },
+      "name": "spoq_assign_personas"
+    },
+    {
+      "inputSchema": {
+        "properties": {
+          "epic_path": {
+            "title": "Epic Path",
+            "type": "string"
+          },
+          "force": {
+            "default": false,
+            "title": "Force",
+            "type": "boolean"
+          },
+          "map_path": {
+            "default": "",
+            "title": "Map Path",
+            "type": "string"
+          },
+          "map_status": {
+            "default": "",
+            "title": "Map Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "epic_path"
+        ],
+        "title": "spoq_complete_epicArguments",
+        "type": "object"
+      },
+      "name": "spoq_complete_epic"
+    },
+    {
+      "inputSchema": {
+        "properties": {
+          "critical_path": {
+            "default": false,
+            "title": "Critical Path",
+            "type": "boolean"
+          },
+          "map_path": {
+            "title": "Map Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "map_path"
+        ],
+        "title": "spoq_compute_epic_wavesArguments",
+        "type": "object"
+      },
+      "name": "spoq_compute_epic_waves"
+    },
+    {
+      "inputSchema": {
+        "properties": {
+          "critical_path": {
+            "default": false,
+            "title": "Critical Path",
+            "type": "boolean"
+          },
+          "epic_path": {
+            "title": "Epic Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "epic_path"
+        ],
+        "title": "spoq_compute_wavesArguments",
+        "type": "object"
+      },
+      "name": "spoq_compute_waves"
+    },
+    {
+      "inputSchema": {
+        "properties": {
+          "path": {
+            "title": "Path",
+            "type": "string"
+          },
+          "resource_type": {
+            "default": "epic",
+            "title": "Resource Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "title": "spoq_demoteArguments",
+        "type": "object"
+      },
+      "name": "spoq_demote"
+    },
+    {
+      "inputSchema": {
+        "properties": {
+          "epic_path": {
+            "title": "Epic Path",
+            "type": "string"
+          },
+          "wave": {
+            "title": "Wave",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "epic_path",
+          "wave"
+        ],
+        "title": "spoq_detect_conflictsArguments",
+        "type": "object"
+      },
+      "name": "spoq_detect_conflicts"
+    },
+    {
+      "inputSchema": {
+        "properties": {
+          "epic_path": {
+            "title": "Epic Path",
+            "type": "string"
+          },
+          "include_critical_path": {
+            "default": true,
+            "title": "Include Critical Path",
+            "type": "boolean"
+          },
+          "resume": {
+            "default": false,
+            "title": "Resume",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "epic_path"
+        ],
+        "title": "spoq_generate_execution_planArguments",
+        "type": "object"
+      },
+      "name": "spoq_generate_execution_plan"
+    },
+    {
+      "inputSchema": {
+        "properties": {
+          "epic_count": {
+            "title": "Epic Count",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "path": {
+            "default": "",
+            "title": "Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "epic_count"
+        ],
+        "title": "spoq_generate_map_skeletonArguments",
+        "type": "object"
+      },
+      "name": "spoq_generate_map_skeleton"
+    },
+    {
+      "inputSchema": {
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "path": {
+            "default": "",
+            "title": "Path",
+            "type": "string"
+          },
+          "task_count": {
+            "title": "Task Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "name",
+          "task_count"
+        ],
+        "title": "spoq_generate_skeletonArguments",
+        "type": "object"
+      },
+      "name": "spoq_generate_skeleton"
+    },
+    {
+      "inputSchema": {
+        "properties": {
+          "epics_base": {
+            "default": "",
+            "title": "Epics Base",
+            "type": "string"
+          },
+          "map_path": {
+            "title": "Map Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "map_path"
+        ],
+        "title": "spoq_get_map_statusArguments",
+        "type": "object"
+      },
+      "name": "spoq_get_map_status"
+    },
+    {
+      "inputSchema": {
+        "properties": {
+          "epic_path": {
+            "title": "Epic Path",
+            "type": "string"
+          },
+          "task_id": {
+            "title": "Task Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "epic_path",
+          "task_id"
+        ],
+        "title": "spoq_get_taskArguments",
+        "type": "object"
+      },
+      "name": "spoq_get_task"
+    },
+    {
+      "inputSchema": {
+        "properties": {
+          "format": {
+            "default": "iso",
+            "title": "Format",
+            "type": "string"
+          }
+        },
+        "title": "spoq_get_timestampArguments",
+        "type": "object"
+      },
+      "name": "spoq_get_timestamp"
+    },
+    {
+      "inputSchema": {
+        "properties": {
+          "epic_path": {
+            "title": "Epic Path",
+            "type": "string"
+          },
+          "wave": {
+            "title": "Wave",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "epic_path",
+          "wave"
+        ],
+        "title": "spoq_get_wave_tasksArguments",
+        "type": "object"
+      },
+      "name": "spoq_get_wave_tasks"
+    },
+    {
+      "inputSchema": {
+        "properties": {
+          "include_stats": {
+            "default": false,
+            "title": "Include Stats",
+            "type": "boolean"
+          },
+          "tier": {
+            "default": "",
+            "title": "Tier",
+            "type": "string"
+          }
+        },
+        "title": "spoq_list_epicsArguments",
+        "type": "object"
+      },
+      "name": "spoq_list_epics"
+    },
+    {
+      "inputSchema": {
+        "properties": {
+          "base_path": {
+            "default": "",
+            "title": "Base Path",
+            "type": "string"
+          }
+        },
+        "title": "spoq_list_mapsArguments",
+        "type": "object"
+      },
+      "name": "spoq_list_maps"
+    },
+    {
+      "inputSchema": {
+        "properties": {
+          "epic_path": {
+            "title": "Epic Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "epic_path"
+        ],
+        "title": "spoq_list_task_statusesArguments",
+        "type": "object"
+      },
+      "name": "spoq_list_task_statuses"
+    },
+    {
+      "inputSchema": {
+        "properties": {
+          "epic_path": {
+            "title": "Epic Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "epic_path"
+        ],
+        "title": "spoq_parse_epicArguments",
+        "type": "object"
+      },
+      "name": "spoq_parse_epic"
+    },
+    {
+      "inputSchema": {
+        "properties": {
+          "epics_base": {
+            "default": "",
+            "title": "Epics Base",
+            "type": "string"
+          },
+          "map_path": {
+            "title": "Map Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "map_path"
+        ],
+        "title": "spoq_parse_mapArguments",
+        "type": "object"
+      },
+      "name": "spoq_parse_map"
+    },
+    {
+      "inputSchema": {
+        "properties": {},
+        "title": "spoq_pingArguments",
+        "type": "object"
+      },
+      "name": "spoq_ping"
+    },
+    {
+      "inputSchema": {
+        "properties": {
+          "path": {
+            "title": "Path",
+            "type": "string"
+          },
+          "resource_type": {
+            "default": "epic",
+            "title": "Resource Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "title": "spoq_promoteArguments",
+        "type": "object"
+      },
+      "name": "spoq_promote"
+    },
+    {
+      "inputSchema": {
+        "properties": {
+          "format": {
+            "default": "table",
+            "title": "Format",
+            "type": "string"
+          },
+          "tier": {
+            "default": "",
+            "title": "Tier",
+            "type": "string"
+          }
+        },
+        "title": "spoq_roadmap_showArguments",
+        "type": "object"
+      },
+      "name": "spoq_roadmap_show"
+    },
+    {
+      "inputSchema": {
+        "properties": {},
+        "title": "spoq_roadmap_syncArguments",
+        "type": "object"
+      },
+      "name": "spoq_roadmap_sync"
+    },
+    {
+      "inputSchema": {
+        "properties": {
+          "epic_path": {
+            "title": "Epic Path",
+            "type": "string"
+          },
+          "notes": {
+            "default": "",
+            "title": "Notes",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "task_id": {
+            "title": "Task Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "epic_path",
+          "task_id",
+          "status"
+        ],
+        "title": "spoq_update_task_statusArguments",
+        "type": "object"
+      },
+      "name": "spoq_update_task_status"
+    },
+    {
+      "inputSchema": {
+        "properties": {
+          "epic_path": {
+            "title": "Epic Path",
+            "type": "string"
+          },
+          "require_frontmatter": {
+            "default": false,
+            "title": "Require Frontmatter",
+            "type": "boolean"
+          },
+          "strict": {
+            "default": false,
+            "title": "Strict",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "epic_path"
+        ],
+        "title": "spoq_validate_epicArguments",
+        "type": "object"
+      },
+      "name": "spoq_validate_epic"
+    },
+    {
+      "inputSchema": {
+        "properties": {
+          "map_path": {
+            "title": "Map Path",
+            "type": "string"
+          },
+          "strict": {
+            "default": false,
+            "title": "Strict",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "map_path"
+        ],
+        "title": "spoq_validate_mapArguments",
+        "type": "object"
+      },
+      "name": "spoq_validate_map"
+    }
+  ],
+  "version": "0.5.1"
+}

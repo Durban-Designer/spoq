@@ -1,0 +1,38 @@
+id: 03-api
+title: REST API Implementation
+epic: test-epic
+status: pending
+priority: high
+phase: 1
+
+dependencies:
+  - 01-setup
+  - 02-core
+
+skills_required:
+  - python
+  - api
+
+files_to_touch:
+  - src/config.py
+  - src/api.py
+
+acceptance_criteria:
+  - "[ ] POST /validate endpoint accepts config files"
+  - "[ ] Response includes validation errors array"
+  - "[ ] Health check endpoint returns 200"
+
+description: |
+  ## Objective
+  Implement the FastAPI REST endpoints for configuration validation.
+
+  ## Steps
+  1. Create FastAPI application scaffold in src/api.py
+  2. Implement POST /validate endpoint with file upload handling
+  3. Integrate config parser from src/config.py for format detection
+  4. Add GET /health endpoint returning service status
+
+  ## Verification
+  ```bash
+  curl -X POST http://localhost:8080/validate -F "file=@test.yml"
+  ```

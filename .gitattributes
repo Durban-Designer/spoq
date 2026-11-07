@@ -1,0 +1,4 @@
+# Snapshot fixtures intentionally include a final blank line; raw length is tested.
+code/mcp/spoq-server/tests/fixtures/test-epic/EPIC.md whitespace=-blank-at-eof
+code/mcp/spoq-server/tests/fixtures/test-map-file.md whitespace=-blank-at-eof
+code/mcp/spoq-server/tests/fixtures/test-map/MAP.md whitespace=-blank-at-eof

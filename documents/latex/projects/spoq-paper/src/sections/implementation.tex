@@ -1,0 +1,209 @@
+% Implementation
+\section{Implementation}
+\label{sec:implementation}
+
+This section describes the practical realization of SPOQ, including the file-system
+representation of epics and tasks, the journal-based tracking system for agent
+work sessions, and the skill framework that encapsulates reusable agent capabilities.
+See Appendix~\ref{subsec:implementation-detail} for complete schema examples,
+journal entry format, and skill metadata.
+
+\subsection{Task Representation: The spoq/epics/ Directory}
+\label{subsec:task-representation}
+
+SPOQ represents epics and tasks as structured files in a designated directory,
+enabling version control, human review, and programmatic manipulation.
+
+\paragraph{Epic Lifecycle.}
+Epics follow a two-stage directory lifecycle that reflects their progression through
+the SPOQ pipeline. During planning, new epics are created under
+\texttt{spoq/epics/active/}, where they remain throughout validation and execution
+phases. Once every constituent task passes the agent-validation gate, the orchestrator
+relocates the entire epic directory to \texttt{spoq/epics/complete/}. This
+filesystem-level transition serves as an unambiguous completion signal: version
+control history preserves the move as a single commit, providing an auditable
+record of when each epic achieved full validation. Separating in-flight work from
+verified deliverables also prevents agents from inadvertently modifying artifacts
+that have already satisfied quality thresholds.
+
+\newpage
+\paragraph{Roadmap Coordination.}
+The \texttt{ROADMAP.md} file at the root of \texttt{spoq/epics/} acts as a
+centralized registry of all epics and their current disposition. During planning,
+the orchestrator appends a new entry containing the epic identifier, a brief
+objective summary, and an initial status of \emph{planned}. As execution proceeds,
+status fields are updated to reflect transitions through \emph{in-progress},
+\emph{validation}, and \emph{done}. Because the roadmap records inter-epic
+dependencies alongside status, it enables the orchestrator to determine which
+downstream epics become unblocked when a predecessor completes.
+
+\paragraph{Task YAML Schema.}
+Each task file follows a standardized YAML schema with three categories of fields:
+
+\begin{definition}[Task Specification]
+\label{def:task-spec}
+A \textit{task specification} is a YAML document with the following structure:
+\end{definition}
+
+\textbf{Identity fields} (\texttt{id}, \texttt{title}, \texttt{epic}) establish
+task context by assigning a unique identifier within the epic, a human-readable
+title, and a back-reference to the parent epic.
+%
+\textbf{Execution control fields} govern scheduling through status tracking
+(\texttt{pending}/\texttt{in\_progress}/\texttt{completed}), priority levels,
+wave assignment via the \texttt{phase} field, PERT three-point effort estimates,
+dependency lists referencing prerequisite task IDs, and required domain skills.
+%
+\textbf{Deliverable fields} define verification criteria: \texttt{files\_to\_touch}
+enumerates all files the agent may modify, \texttt{outputs} lists tangible
+deliverables, and \texttt{acceptance\_criteria} provides a checklist the agent
+must satisfy before marking the task complete.
+%
+A free-form \textbf{description} field supplies structured implementation
+guidance using Markdown, typically containing an objective statement,
+step-by-step instructions with code snippets, and verification commands.
+See Appendix~\ref{subsec:implementation-detail} for annotated examples of each
+field category.
+
+\paragraph{Phase Assignment.}
+The \texttt{phase} field encodes wave assignment from topological analysis:
+\begin{itemize}
+    \item Phase 0: Tasks with no dependencies (Wave 0)
+    \item Phase $n$: Tasks depending only on tasks in phases $< n$
+\end{itemize}
+
+Tasks within the same phase execute concurrently. The critical path determines
+the minimum number of waves required.
+
+\subsection{Journal Tracking System}
+\label{subsec:journal}
+
+SPOQ employs a journal-based tracking system that records agent work sessions
+with structured metadata, enabling explainability, meta-orchestration, and
+training data generation.
+
+\begin{definition}[Journal Entry]
+\label{def:journal-entry}
+A \textit{journal entry} consists of YAML frontmatter followed by Markdown
+sections documenting a completed work session.
+\end{definition}
+
+The frontmatter captures machine-readable metadata: agent identity, ISO 8601
+timestamps, a calibrated confidence score (0.0--1.0), session type classification,
+the list of modified files, and task completion counts. The Markdown body follows
+a standardized layout with sections for summary, work completed, changes made,
+issues encountered, testing results, and next steps. See
+Appendix~\ref{subsec:implementation-detail} for complete format examples and
+tooling support.
+
+\paragraph{Confidence Scoring.}
+Each journal entry includes a calibrated confidence score (0.0--1.0) reflecting
+the agent's self-assessment of work quality. Scores above 0.85 indicate
+well-tested, production-ready output; scores between 0.65--0.84 signal
+functional work requiring additional validation; scores below 0.65 flag
+experimental results with known gaps. See Table~\ref{tab:confidence} in the
+Appendix for the full interpretation scale.
+
+\paragraph{Value Proposition.}
+The journal system provides four categories of value:
+
+\begin{enumerate}
+    \item \textbf{Explainability (XAI):} Every work session is documented with
+    rationale, enabling audit trails and decision archaeology.
+
+    \item \textbf{Multi-Agent Coordination:} Timestamps and task progress enable
+    parallel agents to avoid conflicts and build on each other's work.
+
+    \item \textbf{Knowledge Graph Construction:} Journal entries create nodes
+    (sessions, files, tasks) and edges (MODIFIED, COMPLETED) for analysis.
+
+    \item \textbf{Training Data:} Combined with git commits, journal entries
+    provide rich examples for fine-tuning development-focused LLMs.
+\end{enumerate}
+
+\subsection{Skill Framework}
+\label{subsec:skills}
+
+SPOQ encapsulates reusable agent capabilities as \textit{skills}, self-contained
+modules that provide domain knowledge, workflows, and tooling for specific
+task categories.
+
+\begin{definition}[Skill]
+\label{def:skill}
+A \textit{skill} is a directory containing:
+\begin{itemize}
+    \item \texttt{SKILL.md}: Instructions and metadata (required)
+    \item \texttt{scripts/}: Executable utilities (optional)
+    \item \texttt{references/}: Documentation loaded on demand (optional)
+    \item \texttt{assets/}: Templates and configurations (optional)
+\end{itemize}
+\end{definition}
+
+\paragraph{Core SPOQ Skills.}
+The framework includes six skills aligned with the four-stage pipeline
+(see Table~\ref{tab:skills} in the Appendix for the full inventory).
+
+\paragraph{Skill Invocation and Anatomy.}
+Skills are invoked via slash commands (e.g., \texttt{/epic-planning},
+\texttt{/agent-execution}) that expand into full prompts with context from the
+referenced epic directory. Each skill's \texttt{SKILL.md} contains YAML
+frontmatter (name, description) followed by structured documentation covering
+activation criteria, core patterns, quality standards, and integration points
+with other skills. See Appendix~\ref{subsec:implementation-detail} for
+invocation examples and metadata format.
+
+\paragraph{Skill Extensibility.}
+The \texttt{skill-maker} meta-skill enables creation of new domain-specific
+skills following established patterns. This allows SPOQ deployments to
+accumulate organizational knowledge as reusable agent capabilities.
+
+\newpage
+\subsection{Integration: From Specification to Execution}
+\label{subsec:integration}
+
+The implementation components integrate as follows:
+
+\begin{enumerate}
+    \item \textbf{Epic Creation:} Human uses \texttt{/epic-planning} to decompose
+    a goal. Output: \texttt{EPIC.md} + task YAML files in \texttt{spoq/epics/active/}.
+
+    \item \textbf{Validation:} \texttt{/epic-validation} and \texttt{/task-validation}
+    score specifications against metrics. Failed validations trigger revision.
+
+    \item \textbf{Execution:} \texttt{/agent-execution} reads task files, computes
+    waves, and dispatches Opus workers. Each agent receives task YAML as context.
+
+    \item \textbf{Tracking:} Agents write journal entries on session completion.
+    The journal accumulates work history for the epic.
+
+    \item \textbf{Code Validation:} \texttt{/agent-validation} scores completed
+    tasks. Failed tasks queue for rework with remediation guidance.
+
+    \item \textbf{Completion:} On all tasks passing, the epic moves to
+    \texttt{spoq/epics/complete/}.
+\end{enumerate}
+
+This lifecycle ensures traceability from initial goal through validated
+delivery, with quality gates preventing propagation of defects.
+Appendix~\ref{subsec:integration-detail} discusses integration patterns
+for CI/CD pipelines, project management tools, and git workflows.
+
+\paragraph{Repository Bootstrap.}
+To reduce adoption friction, SPOQ provides cross-platform installer
+scripts (\texttt{spoq-init.sh} for Linux and macOS, \texttt{spoq-init.ps1}
+for Windows) that automate repository initialization. In fresh-install mode,
+the scripts create the five-category directory structure
+(\texttt{code/}, \texttt{documents/}, \texttt{spoq/}, \texttt{infrastructure/},
+\texttt{tests/}), copy the full skill definitions described in
+Section~\ref{subsec:skills}, and generate starter \texttt{CLAUDE.md} and
+\texttt{journal.md} files. An optional \texttt{-{}-full} flag provisions an
+example epic so that new adopters can exercise the pipeline immediately.
+
+For repositories that already use an earlier directory layout, the
+\texttt{-{}-upgrade} flag activates a migration path. The upgrade routine
+detects legacy structures (e.g., \texttt{automation/tasks/}), relocates epics
+to \texttt{spoq/epics/active/} with conflict-aware merging, refreshes
+skill definitions from the canonical source while preserving timestamped
+backups, and updates configuration references. Together, these modes allow a
+team to adopt or migrate to SPOQ with a single command invocation rather than
+manual directory scaffolding.

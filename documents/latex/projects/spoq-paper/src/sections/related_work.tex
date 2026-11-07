@@ -1,0 +1,145 @@
+% Related Work
+\section{Background and Related Work}
+\label{sec:related_work}
+
+\subsection{Multi-Agent Systems for Software Engineering}
+
+Multi-agent approaches to software engineering have gained momentum with the
+advancement of LLM capabilities. We survey representative systems and frameworks:
+
+\paragraph{ChatDev} \citep{qian2023chatdev} simulates a virtual software company
+with role-playing agents (CEO, CTO, Programmer, Tester) that communicate through
+structured chat. While effective for generating simple applications, the sequential
+communication pattern creates bottlenecks, since each agent must wait for prior agents
+to complete their turns before contributing.
+
+\paragraph{MetaGPT} \citep{hong2023metagpt} introduces standardized operating
+procedures (SOPs) that structure agent collaboration around software artifacts
+(PRDs, design documents, code). This reduces communication overhead compared to
+free-form chat but still relies on sequential handoffs between roles.
+
+\paragraph{Multi-Agent Debate (MAD)} \citep{liang2023encouraging} uses multiple
+agents that debate and refine solutions iteratively. While debate can improve
+solution quality through diverse perspectives, the synchronous turn-taking
+limits parallelism.
+
+\paragraph{Autonomous Agent Frameworks} AutoGPT \citep{autogpt2023} and
+BabyAGI \citep{babyagi2023} pioneered recursive self-directed goal decomposition
+but lack dependency management and formal quality gates, yielding unpredictable
+execution paths. CrewAI \citep{crewai2024} coordinates role-defined personas
+through sequential pipelines without built-in validation or parallel dispatch,
+while LangGraph \citep{langgraph2024} models workflows as graphs at the level of
+individual LLM invocations. SPOQ instead operates at task granularity (1--4 hour
+atomic units) with enforced quality thresholds between waves.
+
+\medskip
+SPOQ differs from these systems in three ways: (1) wave-based parallel execution
+rather than sequential role-playing; (2) explicit validation gates with quantified
+metrics; and (3) structured human integration rather than full autonomy.
+
+\subsection{Task Decomposition and Dependency Management}
+
+Hierarchical task decomposition has roots in classical AI planning \citep{nau2003shop2}.
+Modern approaches apply LLMs to generate task breakdowns:
+
+\paragraph{Hierarchical Task Networks (HTNs).} Classical HTN planners decompose
+abstract tasks into primitive actions with ordering constraints. SPOQ adapts
+this structure for multi-agent software engineering.
+
+\paragraph{DAG Scheduling.} Topological sorting of directed acyclic graphs is
+well-established for parallel task scheduling \citep{coffman1972optimal}. SPOQ
+applies these algorithms to LLM-generated task dependencies, computing wave
+assignments that maximize parallelism while respecting precedence constraints.
+
+\paragraph{Critical Path Analysis.} PERT and CPM methods identify the longest
+path through a dependency graph \citep{kelley1959critical}. SPOQ uses critical
+path analysis to estimate minimum wall-clock execution time and identify
+bottleneck tasks.
+
+\newpage
+\subsection{Human-AI Collaboration in AI-Native Engineering}
+
+Human-in-the-loop (HITL) approaches to AI systems span a spectrum from passive
+oversight to active collaboration:
+
+\paragraph{Prompt Engineering.} Users craft prompts to guide LLM behavior but
+have limited ability to influence intermediate reasoning or correct course
+mid-execution \citep{white2023prompt}.
+
+\paragraph{AI Pair Programming.} Tools like GitHub Copilot \citep{chen2021codex}
+suggest code completions while humans retain editing control. This inverts SPOQ's
+model: humans do the work while AI assists, rather than agents doing the work
+while humans validate.
+
+\paragraph{Supervised Autonomy.} Some systems allow human intervention at
+checkpoints \citep{wu2023autogen}. SPOQ extends this with bidirectional
+communication: not only can humans intervene, but agents can explicitly
+request human assistance when facing ambiguity.
+
+\subsection{Autonomous Agent Frameworks}
+
+Early autonomous agent frameworks pioneered recursive goal decomposition and
+self-directed task execution, establishing foundational patterns for agentic AI:
+
+\paragraph{AutoGPT and BabyAGI.}
+AutoGPT \citep{autogpt2023} and BabyAGI \citep{babyagi2023} introduced recursive
+goal decomposition where agents autonomously break objectives into subtasks and
+execute them. These early systems demonstrated that LLMs could function as
+autonomous agents but lack explicit dependency management and formal quality
+gates, leading to unpredictable execution paths. SPOQ addresses these limitations
+through DAG-based scheduling with dual validation gates.
+
+\subsection{Autonomous Software Engineering Agents}
+
+A new category of autonomous software engineering agents has emerged, capable
+of navigating codebases, writing code, running tests, and debugging:
+
+\paragraph{Devin and OpenHands.}
+Devin (Cognition Labs, 2024) \citep{cognition2024devin} demonstrated end-to-end
+autonomous task completion, while OpenHands \citep{wang2024openhands} provides
+an open-source alternative with similar capabilities. Both excel at single-agent
+execution but focus on individual task autonomy rather than multi-agent
+orchestration. SPOQ complements such systems by providing the coordination
+layer for parallel execution across multiple agents.
+
+\subsection{Code Generation and Pair Programming Tools}
+
+Developer-facing code generation tools occupy a different point in the
+autonomy spectrum, emphasizing human-AI collaboration over full autonomy:
+
+\paragraph{Aider and GPT-Engineer.}
+Aider \citep{aider2024} enables conversational code editing where developers
+describe changes in natural language and the tool applies them to local
+repositories. GPT-Engineer \citep{gpteng2023} generates entire applications
+from specifications, producing directory structures and boilerplate code.
+Both tools operate as single agents without parallel execution capabilities
+or formal validation beyond user inspection.
+
+\paragraph{Claude Code.}
+Claude Code (Anthropic, 2025) marked an inflection point for AI-assisted
+software development, establishing the agentic coding paradigm where
+developers collaborate with an autonomous agent that navigates codebases,
+executes commands, and iterates on solutions within a persistent terminal
+session. Unlike completion-based tools, Claude Code operates with full
+project context and can orchestrate multi-step workflows autonomously,
+making it the catalyst that brought agentic development to mainstream
+adoption. SPOQ builds on this foundation: where Claude Code enables a
+single developer-agent partnership, SPOQ coordinates multiple such agents
+in parallel with structured quality gates.
+
+\paragraph{GitHub Copilot.}
+GitHub Copilot \citep{chen2021codex} suggests code completions while humans
+retain editing control, inverting the SPOQ model: humans perform the work
+while AI assists, rather than agents performing work while humans validate.
+SPOQ targets a different use case where agents drive execution with human
+oversight, enabling higher throughput on parallelizable tasks.
+
+\paragraph{Positioning SPOQ.}
+We note that Claude Code, Devin, and similar products are evolving rapidly;
+the capabilities described reflect their state as of late 2025.
+SPOQ does not compete with execution-focused agents or code generation tools.
+Rather, it provides an orchestration layer that coordinates multiple agents
+on complex projects. The key insight is that orchestration and execution are
+separable concerns: an agent like Claude Code excels at executing individual
+tasks, while SPOQ excels at decomposing projects into tasks, scheduling them
+for parallel execution, and validating quality at each gate.

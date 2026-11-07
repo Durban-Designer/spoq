@@ -1,0 +1,156 @@
+% Appendix: Metric Details
+\section{Complete Metric Rubrics}
+\label{sec:appendix-metrics}
+
+This appendix provides detailed scoring rubrics for both validation gates.
+
+\subsection{Planning Validation Rubrics}
+
+\paragraph{Vision Clarity (VC).}
+\begin{itemize}
+    \item 100: Clear overview with problem statement, solution, scope boundaries,
+    and end state
+    \item 80: Clear overview, minor ambiguity in scope
+    \item 60: Overview present but vague
+    \item 40: Overview missing key context
+    \item 0: No overview or incomprehensible goal
+\end{itemize}
+
+\paragraph{Architecture Quality (AQ).}
+\begin{itemize}
+    \item 100: ASCII/visual diagram with all components, relationships, and data flow
+    \item 80: Diagram present, minor gaps in explanation
+    \item 60: Text-only architecture, no diagram
+    \item 40: Partial architecture description
+    \item 0: No architecture section
+\end{itemize}
+
+\paragraph{Task Decomposition (TD).}
+\begin{itemize}
+    \item 100: Atomic tasks (1--4h), independent where possible, complete coverage
+    \item 80: Good decomposition, minor overlap
+    \item 60: Some tasks too large or overlapping
+    \item 40: Significant decomposition issues
+    \item 0: Tasks not properly decomposed
+\end{itemize}
+
+\paragraph{Dependency Graph (DG).}
+\begin{itemize}
+    \item 100: Visual graph, all dependencies valid, no cycles, optimal ordering
+    \item 80: Graph present, dependencies valid, minor ordering improvements possible
+    \item 60: Text-only dependencies, all valid
+    \item 40: Some invalid dependencies or missing graph
+    \item 0: Circular dependencies or critically broken graph
+\end{itemize}
+
+\paragraph{Coverage Completeness (CC).}
+Score equals percentage of success criteria mapped to tasks:
+$\text{CC} = 100 \times \frac{|\text{covered criteria}|}{|\text{total criteria}|}$
+
+\paragraph{Phase Ordering (PO).}
+\begin{itemize}
+    \item 100: Phases follow logical progression, maximum parallelism exploited
+    \item 90: Good ordering, minor parallelism opportunities missed
+    \item 75: Ordering works but inefficient
+    \item 60: Some ordering violations
+    \item 0: Critical ordering errors (dependent tasks in same wave)
+\end{itemize}
+
+\paragraph{Scope Coherence (SC).}
+\begin{itemize}
+    \item 100: All tasks directly serve epic goal
+    \item 80: 1 tangential task
+    \item 60: 2--3 tangential tasks
+    \item 40: Multiple unrelated tasks
+    \item 0: Tasks don't align with epic goal
+\end{itemize}
+
+\paragraph{Success Criteria Quality (SQ).}
+\begin{itemize}
+    \item 100: All criteria SMART, checkbox format, testable
+    \item 90: Criteria measurable, minor gaps
+    \item 75: Some criteria vague
+    \item 60: Multiple unmeasurable criteria
+    \item 0: No success criteria or all vague
+\end{itemize}
+
+\paragraph{Risk Identification (RI).}
+\begin{itemize}
+    \item 100: Risks section with likelihood, impact, and mitigations
+    \item 90: Risks mentioned, implicit mitigations
+    \item 75: Some risks noted, no mitigations
+    \item 60: Risks not addressed
+    \item 0: Critical risks ignored
+\end{itemize}
+
+\paragraph{Integration Strategy (IS).}
+\begin{itemize}
+    \item 100: Clear integration points, verification steps between phases
+    \item 90: Integration implicit but clear
+    \item 75: Some integration points unclear
+    \item 60: Integration strategy missing
+    \item 0: Tasks cannot be integrated as designed
+\end{itemize}
+
+\subsection{Code Validation Rubrics}
+
+\paragraph{Syntactic Correctness (SC).}
+\begin{itemize}
+    \item 100: Compiles cleanly, 0 warnings
+    \item 80: Compiles with minor warnings
+    \item 60: Compiles with significant warnings
+    \item 0: Does not compile
+\end{itemize}
+
+\paragraph{Test Existence (TE).}
+Score equals percentage of new public methods with corresponding tests:
+$\text{TE} = 100 \times \frac{|\text{tested methods}|}{|\text{new public methods}|}$
+
+\paragraph{Test Pass Rate (TP).}
+Score equals percentage of tests passing:
+$\text{TP} = 100 \times \frac{|\text{passing tests}|}{|\text{total tests}|}$
+
+\paragraph{Requirements Fidelity (RF).}
+\begin{itemize}
+    \item 100: All requirements fully implemented
+    \item 80: All core requirements met, minor gaps
+    \item 60: Core requirements met, some missing
+    \item 40: Partial implementation
+    \item 0: Does not address requirements
+\end{itemize}
+
+\paragraph{SOLID Adherence (SA).}
+20 points per principle (S, O, L, I, D) based on degree of adherence.
+
+\paragraph{Security (SE).}
+Start at 100, deduct for OWASP Top 10 vulnerabilities:
+SQL injection ($-100$), command injection ($-100$), XSS ($-60$),
+broken auth ($-80$), sensitive data exposure ($-60$), etc.
+
+\paragraph{Error Handling (EH).}
+20 points each for: I/O wrapped in try-catch, meaningful error messages,
+proper logging, resource cleanup, safe user-facing errors.
+
+\paragraph{Scalability (SL).}
+Based on algorithm complexity of hot paths:
+O(1)/O(log n)/O(n) = 100, O(n log n) = 90, O(n$^2$) = 40, O(2$^n$) = 0.
+
+\paragraph{Code Clarity (CC).}
+\begin{itemize}
+    \item 100: Crystal clear, reads like well-written prose
+    \item 80: Clear with minor naming improvements possible
+    \item 60: Understandable but requires effort
+    \item 40: Confusing structure or naming
+    \item 0: Unreadable, magic numbers, cryptic names
+\end{itemize}
+
+\paragraph{Completeness (CO).}
+\begin{itemize}
+    \item 100: Complete, no loose ends
+    \item 80: Minor polish needed
+    \item 60: Some TODOs remain but core is done
+    \item 40: Significant unfinished sections
+    \item 0: Stub implementations, placeholders
+\end{itemize}
+
+Automatic deductions: TODO ($-25$), FIXME ($-25$), NotImplementedException ($-30$).

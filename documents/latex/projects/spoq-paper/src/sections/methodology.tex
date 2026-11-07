@@ -1,0 +1,343 @@
+% Methodology
+\section{The SPOQ Methodology}
+\label{sec:methodology}
+
+SPOQ orchestrates multi-agent software development through a four-stage pipeline:
+Epic Planning, Epic Validation, Agent Execution, and Agent Validation. We present
+the formal framework, key algorithms, and design principles underlying each stage.
+
+\subsection{Design Principles}
+\label{subsec:principles}
+
+SPOQ is built on five design principles that distinguish it from prior multi-agent approaches:
+
+\begin{principle}[Atomic Task Boundaries]
+\label{prin:atomic}
+Each task constitutes 1--4 hours of focused work with one clear deliverable.
+Tasks are self-contained: a worker agent can complete the task without
+coordinating with other agents during execution.
+\end{principle}
+
+\begin{principle}[Explicit Dependencies]
+\label{prin:dependencies}
+Task dependencies form a directed acyclic graph (DAG), a diagram where arrows
+indicate prerequisite relationships, and no task can indirectly depend on itself.
+All dependencies are declared upfront, enabling static analysis of parallelism
+and identification of the \textit{critical path} (the longest chain of dependent
+tasks that determines minimum project duration).
+\end{principle}
+
+\begin{principle}[Quality Gates Before and After]
+\label{prin:gates}
+Validation occurs both before execution (planning quality) and after execution
+(code quality). Early validation catches expensive mistakes when they are cheapest
+to fix.
+\end{principle}
+
+\begin{principle}[Human-AI Collaboration]
+\label{prin:human}
+A human specialist participates in task decomposition, validates plans, and can
+be consulted by agents. The human is a high-value agent, not an external observer.
+\end{principle}
+
+\begin{principle}[Cost-Optimized Agent Selection]
+\label{prin:cost}
+Different roles require different capability-cost tradeoffs. High-capability
+agents (Opus) handle complex tasks; balanced agents (Sonnet) handle quality
+review; fast-cheap agents (Haiku) handle triage.
+\end{principle}
+
+\subsection{Four-Stage Pipeline}
+\label{subsec:pipeline}
+
+Figure~\ref{fig:pipeline} illustrates the SPOQ pipeline.
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    node distance=0.8cm,
+    stage/.style={rectangle, draw=spoqnavy, fill=spoqnavy!10, thick,
+                  minimum width=3cm, minimum height=1cm, align=center},
+    gate/.style={diamond, draw=spoqemerald, fill=spoqemerald!10, thick,
+                 aspect=2, inner sep=2pt, align=center},
+    arrow/.style={-Stealth, thick},
+    label/.style={font=\small\itshape, text=spoqgray}
+]
+
+% Stages
+\node[stage] (plan) {Epic Planning};
+\node[gate, right=of plan] (eval1) {Epic\\Valid?};
+\node[stage, right=of eval1] (exec) {Agent\\Execution};
+\node[gate, right=of exec] (eval2) {Code\\Valid?};
+\node[stage, right=of eval2] (done) {Complete};
+
+% Arrows
+\draw[arrow] (plan) -- (eval1);
+\draw[arrow] (eval1) -- node[above, label] {$\geq$95} (exec);
+\draw[arrow] (exec) -- (eval2);
+\draw[arrow] (eval2) -- node[above, label] {$\geq$95} (done);
+
+% Feedback loops
+\draw[arrow, spoqburgundy] (eval1.south) -- ++(0,-0.5) -| node[below, label, pos=0.25] {revise} (plan.south);
+\draw[arrow, spoqburgundy] (eval2.south) -- ++(0,-0.8) -| node[below, label, pos=0.25] {rework} (exec.south);
+
+% Human integration
+\node[above=0.3cm of plan, font=\small, text=spoqbrass] {Human + AI};
+\node[above=0.3cm of eval1, font=\small, text=spoqbrass] {Human + AI};
+
+\end{tikzpicture}
+\caption{SPOQ four-stage pipeline with dual validation gates. Human specialist
+participates in planning and plan validation. Failed validations trigger
+revision/rework loops.}
+\label{fig:pipeline}
+\end{figure}
+
+\begin{definition}[Epic]
+\label{def:epic}
+An \textit{epic} $E = (G, T, D, S)$ consists of:
+\begin{itemize}
+    \item $G$: Goal statement describing the desired outcome
+    \item $T = \{t_1, t_2, \ldots, t_n\}$: Set of atomic tasks
+    \item $D \subseteq T \times T$: Dependency relation where $(t_i, t_j) \in D$
+          means $t_i$ must complete before $t_j$ can begin
+    \item $S = \{s_1, s_2, \ldots, s_m\}$: Success criteria for the epic
+\end{itemize}
+\end{definition}
+
+\begin{definition}[Task]
+\label{def:task}
+A \textit{task} $t = (id, desc, deps, files, criteria, est)$ consists of:
+\begin{itemize}
+    \item $id$: Unique identifier within the epic
+    \item $desc$: Implementation description with steps
+    \item $deps \subseteq T$: Set of prerequisite tasks (work that must finish first)
+    \item $files$: List of files to be modified
+    \item $criteria$: Acceptance criteria for task completion
+    \item $est = (o, r, p)$: Three-point estimate: best-case ($o$), expected ($r$),
+          and worst-case ($p$) durations, borrowed from PERT project management
+\end{itemize}
+\end{definition}
+
+\subsection{Wave-Based Topological Dispatch}
+\label{subsec:waves}
+
+Given a task dependency graph, SPOQ computes \textit{waves}, groups of tasks
+that can execute in parallel because they have no dependencies on each other.
+The algorithm uses \textit{topological sorting}, a standard graph algorithm
+that orders nodes (tasks) such that all dependencies appear before the nodes
+that require them.
+
+\begin{definition}[Wave Assignment]
+\label{def:wave}
+A \textit{wave assignment} $W: T \rightarrow \mathbb{N}$ maps each task to a
+non-negative integer such that:
+\begin{equation}
+\forall (t_i, t_j) \in D: W(t_i) < W(t_j)
+\end{equation}
+Tasks in the same wave have no dependencies between them and can execute
+concurrently.
+\end{definition}
+
+Algorithm~\ref{alg:waves} presents the wave computation procedure.
+
+\begin{algorithm}[htbp]
+\caption{Wave Computation via Topological Sort}
+\label{alg:waves}
+\begin{algorithmic}[1]
+\Require Task set $T$, dependency relation $D$
+\Ensure Wave assignment $W: T \rightarrow \mathbb{N}$
+
+\State $\text{indegree}[t] \gets |\{t' : (t', t) \in D\}|$ for all $t \in T$
+\State $W[t] \gets \bot$ for all $t \in T$
+\State $w \gets 0$
+
+\While{$\exists t \in T : W[t] = \bot$}
+    \State $\text{ready} \gets \{t \in T : W[t] = \bot \land \text{indegree}[t] = 0\}$
+    \For{$t \in \text{ready}$}
+        \State $W[t] \gets w$
+    \EndFor
+    \For{$t \in \text{ready}$}
+        \For{$t' : (t, t') \in D$}
+            \State $\text{indegree}[t'] \gets \text{indegree}[t'] - 1$
+        \EndFor
+    \EndFor
+    \State $w \gets w + 1$
+\EndWhile
+
+\State \Return $W$
+\end{algorithmic}
+\end{algorithm}
+
+\begin{theorem}[Parallelism Bound]
+\label{thm:parallelism}
+Let $W^* = \max_{t \in T} W(t)$ be the number of waves. The wall-clock execution
+time is bounded below by:
+\begin{equation}
+T_{\text{wall}} \geq \sum_{w=0}^{W^*} \max_{t: W(t)=w} \text{duration}(t)
+\end{equation}
+This bound is achieved when sufficient agents are available to execute all
+tasks in each wave simultaneously.
+\end{theorem}
+
+\paragraph{Critical Path Analysis.}
+The \textit{critical path} is the longest chain of dependent tasks through the
+graph, weighted by durations. Even with unlimited parallel resources, the project
+cannot complete faster than this path; it represents the irreducible sequential
+bottleneck. Identifying critical path tasks reveals where delays have the greatest
+impact. The theoretical minimum execution time is:
+
+\begin{equation}
+T_{\text{critical}} = \max_{\text{path } P} \sum_{t \in P} \text{duration}(t)
+\end{equation}
+
+SPOQ reports the \textit{speedup factor} $\sigma = T_{\text{sequential}} / T_{\text{critical}}$,
+comparing sequential execution time (all tasks one-by-one) to the parallelized
+critical path time. A speedup of 5.3x, for example, means the work completes
+in roughly one-fifth the time it would take serially.
+
+\subsection{Three-Tier Agent Hierarchy}
+\label{subsec:agent-hierarchy}
+
+SPOQ employs three agent tiers, each optimized for its role:
+
+\begin{table}[H]
+\centering
+\caption{SPOQ Agent Hierarchy}
+\label{tab:agents}
+\begin{tabular}{llll}
+\toprule
+\textbf{Tier} & \textbf{Model} & \textbf{Role} & \textbf{Tradeoff} \\
+\midrule
+Worker & Opus & Task execution & High capability, high cost \\
+Reviewer & Sonnet & Quality assurance & Balanced capability/cost \\
+Investigator & Haiku & Build failure triage & Low cost, fast response \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Opus Workers.}
+For each task $t$ in the current wave, SPOQ spawns an Opus agent with:
+(1) the task specification, (2) relevant epic context, (3) completed dependency
+outputs, and (4) prior QA feedback if this is a rework attempt.
+
+\paragraph{Sonnet Reviewers.}
+Each completed task undergoes quality review by a Sonnet agent, which scores
+the work against 10 code quality metrics (Section~\ref{sec:validation}).
+Tasks scoring below threshold are queued for rework with specific remediation
+guidance.
+
+\paragraph{Haiku Investigators.}
+When the build fails after a wave, a Haiku agent analyzes the error output
+to determine which tasks likely caused the failure. This triage is fast and
+inexpensive, allowing rapid identification of problematic tasks without
+engaging the full QA process.
+
+\paragraph{Platform Independence.}
+While our reference implementation uses Anthropic's Claude model family,
+the SPOQ methodology is inherently platform-agnostic. The three-tier
+hierarchy represents an abstract capability mapping: any sufficiently capable
+model family can populate the Worker (high capability, high cost),
+Investigator (low cost, fast response), and Reviewer (balanced capability/cost)
+tiers. Table~\ref{tab:tier-mapping} illustrates potential mappings across providers.
+
+\begin{table}[htbp]
+\centering
+\caption{Capability Tier Mapping Across LLM Providers}
+\label{tab:tier-mapping}
+\footnotesize
+\begin{tabular}{lllll}
+\toprule
+\textbf{Tier} & \textbf{Role} & \textbf{Claude} & \textbf{OpenAI} & \textbf{Gemini} \\
+\midrule
+Worker & Task execution & Opus & GPT-4 & Ultra/Pro \\
+Reviewer & Quality assurance & Sonnet & GPT-4-turbo & Pro \\
+Investigator & Build triage & Haiku & GPT-3.5 & Flash \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The core methodological contributions, including wave-based topological dispatch,
+dual validation gates, explicit dependency DAGs, and Human-as-an-Agent
+integration, require no vendor-specific features and transfer directly
+to alternative platforms. Organizations can implement SPOQ using their
+preferred LLM provider by calibrating capability tiers to their available
+models and adjusting cost thresholds accordingly.
+
+\newpage
+\subsection{Human-as-an-Agent (HaaA) Integration}
+\label{subsec:haaa}
+
+SPOQ treats the human specialist as a high-value agent integrated into the
+orchestration loop, not an external supervisor. Rather than simply monitoring
+AI agents from the sideline, the human actively participates, contributing
+expertise where it matters most and receiving assistance in return.
+
+\begin{definition}[Human-as-an-Agent]
+\label{def:haaa}
+The \textit{Human-as-an-Agent} (HaaA) paradigm defines bidirectional integration,
+meaning communication flows both ways between human and system:
+\begin{enumerate}
+    \item \textbf{Human$\rightarrow$System:} The human participates in epic
+    planning, validates epics before execution, and can intervene during execution.
+    \item \textbf{System$\rightarrow$Human:} Agents can request human assistance
+    when facing ambiguity, blocked progress, or decisions beyond their scope.
+\end{enumerate}
+\end{definition}
+
+This bidirectional model enables \textit{quality amplification}: the human's
+judgment improves task decomposition quality (reducing downstream rework),
+while agents' execution scales the human's productivity.
+
+\paragraph{Task Decomposition.}
+The human specialist drafts epics using hierarchical task decomposition,
+assisted by LLM suggestions. The human ensures:
+\begin{itemize}
+    \item Tasks are appropriately scoped (1--4 hours)
+    \item Dependencies are correctly identified
+    \item Acceptance criteria are verifiable
+    \item Potential risks are mitigated
+\end{itemize}
+
+\paragraph{Validation Participation.}
+Before execution, the human reviews the epic alongside the automated
+validation. The human can approve, request revisions, or override
+automated assessments with justification.
+
+\paragraph{Consultation Requests.}
+During execution, agents may encounter situations requiring human judgment:
+ambiguous requirements, conflicting dependencies, or decisions with
+significant implications. Agents can pause and request human input rather
+than proceeding with potentially incorrect assumptions.
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    node distance=1.8cm and 2.5cm,
+    entity/.style={rectangle, draw=spoqnavy, fill=spoqnavy!10, thick,
+                   minimum width=2.5cm, minimum height=0.8cm, align=center},
+    human/.style={rectangle, draw=spoqbrass, fill=spoqbrass!10, thick,
+                  minimum width=2.5cm, minimum height=0.8cm, align=center},
+    arrow/.style={-Stealth, thick},
+    bidir/.style={Stealth-Stealth, thick, spoqemerald}
+]
+
+% Entities
+\node[human] (human) {Human Specialist};
+\node[entity, below left=of human] (plan) {Epic Planning};
+\node[entity, below=of human] (valid) {Validation};
+\node[entity, below right=of human] (exec) {Execution};
+
+% Bidirectional arrows with separated labels
+\draw[bidir] (human) to[bend right=15] node[left, font=\small] {draft/refine} (plan);
+\draw[bidir] (human) -- node[fill=white, font=\small, inner sep=2pt] {review/approve} (valid);
+\draw[bidir] (human) to[bend left=15] node[right, font=\small] {consult/intervene} (exec);
+
+% System flow
+\draw[arrow, dashed] (plan) -- (valid);
+\draw[arrow, dashed] (valid) -- (exec);
+
+\end{tikzpicture}
+\caption{Human-as-an-Agent integration. Bidirectional arrows indicate two-way
+communication: human contributes to each stage and can be consulted by the system.}
+\label{fig:haaa}
+\end{figure}

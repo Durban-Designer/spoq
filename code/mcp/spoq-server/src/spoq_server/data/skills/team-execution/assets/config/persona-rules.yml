@@ -1,0 +1,154 @@
+# =============================================================================
+# Persona Assignment Rules
+# =============================================================================
+# Maps skills and file patterns to persona types for team-execution.
+#
+# Scoring: Score = (skill_matches * 2) + (file_pattern_matches * 1)
+# If no score > 0, defaults to "fullstack".
+# =============================================================================
+
+personas:
+  frontend:
+    description: "Frontend specialist — React, Next.js, Tailwind, accessibility"
+    skills:
+      - react
+      - nextjs
+      - next.js
+      - tailwind
+      - tailwindcss
+      - css
+      - accessibility
+      - a11y
+      - html
+      - responsive
+      - ui
+      - ux
+      - framer-motion
+      - shadcn
+    file_patterns:
+      - "src/components/"
+      - "src/app/"
+      - "*.tsx"
+      - "*.jsx"
+      - "*.css"
+      - "*.scss"
+      - "tailwind.config"
+      - "postcss.config"
+      - "public/"
+
+  backend:
+    description: "Backend specialist — APIs, databases, server-side logic"
+    skills:
+      - java
+      - spring
+      - nestjs
+      - postgresql
+      - api
+      - graphql
+      - rest
+      - prisma
+      - drizzle
+      - sql
+      - redis
+      - kafka
+      - grpc
+      - node
+      - express
+      - fastify
+    file_patterns:
+      - "src/service/"
+      - "src/api/"
+      - "src/server/"
+      - "*.java"
+      - "*.kt"
+      - "*.go"
+      - "*.py"
+      - "src/lib/db"
+      - "prisma/"
+      - "migrations/"
+
+  infrastructure:
+    description: "Infrastructure specialist — Terraform, Docker, AWS, CI/CD"
+    skills:
+      - terraform
+      - docker
+      - aws
+      - ci-cd
+      - cicd
+      - kubernetes
+      - k8s
+      - cloudfront
+      - s3
+      - nginx
+      - github-actions
+      - gitlab-ci
+      - ansible
+      - helm
+    file_patterns:
+      - "infrastructure/"
+      - "terraform/"
+      - "Dockerfile"
+      - "docker-compose"
+      - ".github/workflows/"
+      - ".gitlab-ci"
+      - "deploy/"
+      - "scripts/"
+      - "Makefile"
+      - "*.tf"
+      - "*.tfvars"
+
+  documentation:
+    description: "Documentation specialist — LaTeX, Markdown, technical writing"
+    skills:
+      - latex
+      - markdown
+      - technical-writing
+      - documentation
+      - copywriting
+      - seo
+    file_patterns:
+      - "documents/"
+      - "docs/"
+      - "*.tex"
+      - "*.md"
+      - "*.mdx"
+      - "*.rst"
+      - "README"
+      - "CHANGELOG"
+
+  testing:
+    description: "Testing specialist — Jest, Playwright, E2E, pytest"
+    skills:
+      - jest
+      - playwright
+      - e2e
+      - pytest
+      - testing
+      - cypress
+      - vitest
+      - mocha
+      - chai
+      - selenium
+      - test-automation
+      - tdd
+      - bdd
+    file_patterns:
+      - "*.test.*"
+      - "*.spec.*"
+      - "tests/"
+      - "test/"
+      - "e2e/"
+      - "__tests__/"
+      - "cypress/"
+      - "playwright/"
+      - "fixtures/"
+
+  fullstack:
+    description: "General-purpose fallback — handles any task type"
+    skills: []
+    file_patterns: []
+
+# Scoring weights
+weights:
+  skill_match: 2
+  file_pattern_match: 1

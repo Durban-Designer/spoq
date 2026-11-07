@@ -1,0 +1,183 @@
+% Discussion
+\newpage
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{Comparison with Prior Multi-Agent Systems}
+\label{subsec:comparison}
+
+Table~\ref{tab:comparison} contrasts SPOQ with representative
+multi-agent systems and autonomous coding tools.
+
+\begin{table}[htbp]
+\centering
+\caption{Comparison of Multi-Agent and Autonomous Coding Approaches}
+\label{tab:comparison}
+\footnotesize
+\begin{tabular}{lccccccc}
+\toprule
+\textbf{Feature} & \textbf{SPOQ} & \textbf{ChatDev} & \textbf{MetaGPT} & \textbf{AutoGPT} & \textbf{Devin} & \textbf{Aider} \\
+\midrule
+Execution model & Wave-parallel & Sequential & Sequential & Recursive & Single-agent & Single-agent \\
+Explicit dependencies & DAG & Implicit & Implicit & Priority queue & None & None \\
+Planning validation & 10 metrics & None & Informal & None & None & None \\
+Code validation & 10 metrics & Test-based & Review & Self-eval & Test-based & Test-based \\
+Human integration & HaaA & Observer & Observer & Minimal & Minimal & Collaborative \\
+Agent specialization & 3-tier & Role-based & Role-based & General & General & General \\
+Parallelism potential & High & Low & Low & Low & None & None \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Execution Model.}
+ChatDev and MetaGPT use sequential role-playing where agents take turns.
+MAD uses synchronous debate rounds. SPOQ achieves true parallelism through
+wave-based dispatch, with agents in the same wave executing concurrently.
+
+\paragraph{Dependency Management.}
+Prior systems embed dependencies implicitly in role sequences (programmer
+after designer) or artifact flows. SPOQ makes dependencies explicit in a
+DAG, enabling static analysis, critical path computation, and parallelism
+optimization.
+
+\paragraph{Validation Rigor.}
+ChatDev relies on test execution; MetaGPT uses informal review.
+SPOQ applies structured metrics at both planning and code stages,
+with quantified thresholds that prevent low-quality work from proceeding.
+
+\paragraph{Human Role.}
+In ChatDev and MetaGPT, humans observe outputs but do not participate
+in the orchestration loop. SPOQ's HaaA model integrates human judgment
+at key decision points while preserving automation benefits.
+
+\subsection{Limitations}
+\label{subsec:limitations}
+
+SPOQ has several limitations that future work should address:
+
+\paragraph{Upfront Planning Investment.}
+SPOQ requires detailed epic specifications before execution begins.
+For exploratory or rapidly-changing requirements, this upfront cost
+may be prohibitive. Projects with unclear scope may benefit from
+more adaptive approaches.
+
+\paragraph{Dependency on Human Quality.}
+The HaaA model's effectiveness depends on the human specialist's
+skill in task decomposition and validation. A human who approves
+poorly-structured epics will see cascading quality issues.
+
+\paragraph{Empirical Scale.}
+Our controlled benchmark suite covers four full-stack tasks across two
+provider families (Claude and a locally hosted Qwen3.6-35B-A3B). The
+accompanying deployment study spans 17 repositories, 1{,}822 completed
+tasks, and 13{,}866 executed tests, with one third-party adopter. While
+this breadth strengthens generalizability claims relative to a single
+case study, the four-task benchmark suite is still modest, the Qwen
+replication is single-shot rather than mean$\pm$sd, and most field
+deployments share a single primary author. Independent replication by
+other teams, larger benchmark suites with repeated stochastic runs,
+and broader controlled studies with matched baselines are needed to
+validate speedup and quality claims rigorously.
+
+\paragraph{Reference Implementation Coupling.}
+Our current implementation is coupled to Claude Code and Anthropic's
+model family, representing a specific instantiation of the SPOQ methodology
+rather than its only possible form. However, the core methodology, including wave
+computation, validation scoring, dependency resolution, and journal
+tracking, is expressed in platform-agnostic YAML and Markdown formats.
+Porting SPOQ to alternative platforms (Gemini CLI, OpenAI Assistants API,
+open-source model deployments) would require remapping the capability
+tiers to the target provider's model offerings and adapting the
+orchestration interface. The fundamental algorithms and quality gates
+remain unchanged across implementations.
+
+\paragraph{No Cross-Epic Learning.}
+Each epic starts fresh. SPOQ does not currently transfer lessons
+from prior epics (successful patterns, common failure modes) to
+new planning sessions.
+
+\paragraph{Metric Reliability.}
+The 20 validation metrics rely on LLM-based assessment without
+inter-rater reliability testing. Automated quality scores may
+exhibit biases, inconsistency across runs, or susceptibility
+to gaming. Human validation studies comparing LLM scores to
+expert assessments are needed.
+
+\paragraph{Cost Approximations.}
+Our cost analysis uses estimated token counts that vary
+significantly by task complexity, codebase size, and context
+requirements. Real-world costs may differ substantially. The
+analysis does not include infrastructure, human oversight time,
+or rework loop costs comprehensively.
+
+\subsection{Future Work}
+\label{subsec:future}
+
+A platform-level development addresses SPOQ's orchestration overhead
+and defines the near-term trajectory of the methodology.
+
+\paragraph{Native Platform Support: Claude Code Agent Teams.}
+SPOQ's current orchestration relies on manually-coordinated Claude Code
+instances. Claude Code's experimental Agent Teams feature provides native
+primitives that align directly with SPOQ's dispatch model: \texttt{TeamCreate}
+establishes a coordinated session with a lead and specialized teammates,
+\texttt{TaskCreate}/\texttt{TaskUpdate} manage a shared task list with
+dependency tracking, and \texttt{SendMessage} enables direct inter-agent
+communication. Teams support plan approval workflows where teammates
+operate in read-only mode until the lead validates their approach, mirroring
+SPOQ's validation gates.
+
+The mapping is natural: SPOQ's wave computation produces task assignments
+with explicit dependencies; Agent Teams' task list enforces those
+dependencies through blocked/unblocked state transitions. SPOQ's three-tier
+hierarchy (Opus workers, Haiku investigators, Sonnet reviewers) maps to
+Agent Teams' model selection per teammate. The delegate mode, which
+restricts the lead to coordination-only tools, formalizes SPOQ's
+orchestrator role separation.
+
+Integrating SPOQ with Agent Teams would shift the methodology from a
+set of conventions enforced by skill prompts to a native orchestration
+protocol. Wave dispatch becomes \texttt{TaskCreate} with dependency
+declarations. Validation gates become \texttt{TaskCompleted} hooks that
+invoke Sonnet reviewers before marking tasks done. The journal system
+feeds naturally into the shared task list's completion records.
+This creates a pipeline where the human declares a goal, the
+orchestrator generates a wave-structured task list, and Agent Teams
+execute it with built-in coordination, messaging, and quality enforcement.
+
+\subsection{Broader Implications}
+\label{subsec:implications}
+
+SPOQ represents a step toward \textit{AI-native software engineering}:
+development processes designed around AI capabilities rather than
+retrofitting AI into human-centric workflows.
+
+Key implications include:
+
+\begin{itemize}
+    \item \textbf{Redefined roles:} Engineers shift from writing code
+    to validating agent outputs, decomposing problems, and making
+    architectural decisions.
+
+    \item \textbf{Quality as constraint:} Explicit quality gates force
+    upfront investment in planning, potentially improving overall
+    software quality.
+
+    \item \textbf{Scalable expertise:} A single human specialist can
+    leverage multiple agents, scaling their expertise across more
+    projects than traditional pair programming allows.
+\end{itemize}
+
+\paragraph{The Director Model.}
+At scale, SPOQ enables a single engineer to direct a digital workforce:
+6 Claude Code instances (1 planning copilot + 5 execution overseers)
+coordinating 50--100 concurrent agents across independent epics, achieving
+daily throughput of 75--150 tasks with output previously requiring
+8--10 engineers.
+
+\paragraph{Applicability.}
+SPOQ's structured approach introduces upfront overhead that pays off for
+projects with 5+ parallelizable tasks spanning 4+ hours of estimated work.
+Below this threshold, orchestration overhead typically exceeds execution
+time savings. Appendix~\ref{subsec:usage-guidance-detail} provides a
+detailed decision framework with applicability guidance by project type.

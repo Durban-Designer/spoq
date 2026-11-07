@@ -1,0 +1,4 @@
+interface:
+  display_name: "/spoq"
+  short_description: "Take an idea through tested completion with SPOQ"
+  default_prompt: "Use $spoq to take my software goal from discovery through implementation and verification."

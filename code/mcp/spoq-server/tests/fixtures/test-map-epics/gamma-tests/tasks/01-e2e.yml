@@ -1,0 +1,33 @@
+id: 01-e2e
+title: End-to-End Pipeline Tests
+epic: gamma-tests
+status: pending
+priority: critical
+phase: 0
+
+dependencies: []
+
+skills_required:
+  - python
+  - testing
+
+files_to_touch:
+  - tests/test_e2e.py
+
+acceptance_criteria:
+  - "[ ] E2E tests exercise full API workflow"
+  - "[ ] Tests verify data model round-trip"
+
+description: |
+  ## Objective
+  Write end-to-end tests that validate the complete pipeline integration.
+
+  ## Steps
+  1. Set up test fixtures with sample data
+  2. Write tests calling API endpoints
+  3. Assert response structure and data integrity
+
+  ## Verification
+  ```bash
+  python -m pytest tests/test_e2e.py -v
+  ```

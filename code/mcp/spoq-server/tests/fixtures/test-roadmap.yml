@@ -1,0 +1,118 @@
+version: 1
+updated_at: "2026-03-15T12:00:00Z"
+epics:
+  # --- Backlog tier (2 entries) ---
+  - slug: observability-dashboard
+    title: Build observability dashboard for agent metrics
+    tier: backlog
+    status: proposed
+    priority: 5
+    tasks: 8
+    dependencies:
+      - telemetry-pipeline
+    completed_date: null
+    description: >
+      Grafana-based dashboard displaying agent throughput, error rates,
+      and wave execution timelines. Requires the telemetry pipeline to
+      be operational before data can flow.
+
+  - slug: cli-plugin-system
+    title: Add plugin architecture to SPOQ CLI
+    tier: backlog
+    status: proposed
+    priority: 6
+    tasks: 12
+    dependencies: []
+    completed_date: null
+    description: >
+      Allow third-party extensions to register custom commands and
+      validation hooks through a discoverable plugin interface.
+
+  # --- Active tier (3 entries) ---
+  - slug: backlog-yaml-roadmap
+    title: Replace ROADMAP.md with machine-readable YAML
+    tier: active
+    status: in-progress
+    priority: 1
+    tasks: 15
+    dependencies: []
+    completed_date: null
+    description: >
+      Introduce a 3-tier lifecycle for epics, migrate the legacy
+      markdown roadmap to ROADMAP.yml, and expose MCP tooling for
+      promotion, demotion, and rendering.
+
+  - slug: auth-rbac-roles
+    title: Implement role-based access control for agent teams
+    tier: active
+    status: in-progress
+    priority: 2
+    tasks: 10
+    dependencies: []
+    completed_date: null
+    description: >
+      Define roles (admin, reviewer, worker) and enforce permission
+      boundaries so that agents operate within their designated scope.
+
+  - slug: telemetry-pipeline
+    title: Instrument agent execution with structured telemetry
+    tier: active
+    status: pending
+    priority: 3
+    tasks: 7
+    dependencies:
+      - auth-rbac-roles
+    completed_date: null
+    description: >
+      Emit structured events during wave dispatch and task execution
+      for downstream consumption by dashboards and alerting systems.
+
+  # --- Complete tier (4 entries) ---
+  - slug: spoq-rs-orchestrator
+    title: Rust-based orchestrator for wave dispatch
+    tier: complete
+    status: done
+    priority: null
+    tasks: 12
+    dependencies: []
+    completed_date: "2026-02-23"
+    description: >
+      High-performance orchestrator written in Rust that computes
+      topological waves and dispatches agent tasks in parallel.
+
+  - slug: spoq-mcp-server
+    title: Python MCP server for SPOQ tooling
+    tier: complete
+    status: done
+    priority: null
+    tasks: 9
+    dependencies: []
+    completed_date: "2026-02-23"
+    description: >
+      MCP server exposing epic parsing, validation, wave computation,
+      and task management as callable tools.
+
+  - slug: website-redesign-ada
+    title: Accessible website redesign with WCAG compliance
+    tier: complete
+    status: done
+    priority: null
+    tasks: 16
+    dependencies: []
+    completed_date: "2026-02-11"
+    description: >
+      Full redesign of spoqpaper.com with accessibility-first approach,
+      meeting WCAG 2.1 AA standards across all pages.
+
+  - slug: seo-ai-first-optimization
+    title: SEO optimization targeting AI-assisted search
+    tier: complete
+    status: done
+    priority: null
+    tasks: 13
+    dependencies:
+      - website-redesign-ada
+    completed_date: "2026-02-15"
+    description: >
+      Structured data markup, semantic HTML improvements, and content
+      restructuring to improve visibility in AI-driven search results.

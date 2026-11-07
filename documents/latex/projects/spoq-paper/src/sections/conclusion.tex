@@ -1,0 +1,77 @@
+% Conclusion
+\section{Conclusion}
+\label{sec:conclusion}
+
+We introduced SPOQ (Specialist Orchestrated Queuing), a methodology for
+multi-agent software engineering that addresses coordination, quality,
+and human oversight challenges in prior approaches.
+
+\subsection{Summary of Contributions}
+
+\paragraph{Wave-Based Topological Dispatch.}
+SPOQ computes parallel execution waves from task dependency graphs.
+Experiment~1 demonstrates the scheduler's behavior under two regimes:
+on unbounded synthetic DAGs, wave dispatch reaches the critical-path
+lower bound (ratio 1.03--1.11) with speedups up to 14.3$\times$,
+showing that the algorithm captures essentially all available
+parallelism; on a 2-slot local backend running real LLM calls, it
+delivers a stable 1.4$\times$ speedup that matches the hardware
+concurrency ceiling, showing that the result survives realistic
+backend constraints. Field deployments report 1.3--5.3$\times$
+wall-clock gains across diverse production epics.
+
+\paragraph{Dual Validation Gates.}
+By validating both planning quality (10 metrics, 95/90 threshold) and
+code quality (10 metrics, 95/80 threshold), SPOQ catches issues at the
+stages where they are cheapest to fix. Experiment~3 shows that dual
+validation reduces defects per task from 0.34 to 0.20, increases test
+pass rate from 91.25\% to 99.75\%, and eliminates static warnings
+across the benchmark suite.
+
+\paragraph{Human-as-an-Agent Integration.}
+The HaaA paradigm positions the human specialist as a high-value agent
+within the orchestration loop, enabling bidirectional collaboration that
+amplifies both human judgment and agent productivity. Experiment~4
+demonstrates that human-assisted planning further reduces residual
+defects from 0.47 to 0.03 per task and lifts test pass rate from 96.5\%
+to 99.75\%, with a parallel improvement in plan quality observed under a
+local open-weights provider.
+
+\paragraph{Three-Tier Agent Hierarchy.}
+SPOQ's Opus/Sonnet/Haiku hierarchy optimizes cost-quality tradeoffs by
+matching agent capabilities to role requirements: high capability for
+execution, balanced for review, fast-cheap for triage.
+
+\paragraph{Cross-Provider Replication.}
+All four experiments were replicated against a locally hosted
+Qwen3.6-35B-A3B model served by \texttt{llama.cpp}. The direction and
+significance of the SPOQ gains are preserved across provider families:
+structured planning recovers 35 points of coverage and 52.5 points of
+parallelism that the unaided Qwen baseline loses, eliminates the
+cyclic-plan failure mode (2/4 $\to$ 0/4), and the validation ablation
+maintains the same monotonic Full-SPOQ $>$ Code-Validation $>$
+No-Validation ordering observed under Claude. This supports the claim
+that the improvements stem from orchestration rather than from any
+specific model's capabilities.
+
+\paragraph{Practical Lessons.}
+Through controlled benchmarks and a 17-repository deployment study we
+identified and addressed failure modes including runaway retry loops,
+lock file contention, and context window exhaustion.
+
+\subsection{Vision for AI-Native Engineering}
+
+SPOQ represents early steps toward a future where engineers become
+architects and validators rather than line-by-line implementers, where
+quality is built into process through structured gates, and where human
+expertise scales through orchestration. Much work remains to realize this
+vision fully. We hope SPOQ provides a useful framework for researchers
+and practitioners exploring the frontier of AI-assisted software
+development.
+
+\subsection*{Acknowledgments}
+
+We thank the Claude Code development team for the tooling infrastructure
+that enabled this research. We also thank Ross Sylvester (CEO, Adrata) and
+John Armbruster (Founding Engineer, Notary Everyday), whose adoption of
+SPOQ and candid feedback helped refine the methodology.

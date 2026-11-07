@@ -1,0 +1,34 @@
+id: 01-endpoints
+title: REST API Endpoints
+epic: beta-api
+status: pending
+priority: critical
+phase: 0
+
+dependencies: []
+
+skills_required:
+  - python
+  - fastapi
+
+files_to_touch:
+  - src/api.py
+  - src/routes.py
+
+acceptance_criteria:
+  - "[ ] CRUD endpoints handle JSON payloads"
+  - "[ ] Health check endpoint returns 200"
+
+description: |
+  ## Objective
+  Create the FastAPI application with CRUD and health check endpoints.
+
+  ## Steps
+  1. Set up FastAPI application
+  2. Implement CRUD route handlers
+  3. Add health check endpoint
+
+  ## Verification
+  ```bash
+  python -m pytest tests/test_api.py
+  ```

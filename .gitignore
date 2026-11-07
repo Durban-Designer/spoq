@@ -1,0 +1,42 @@
+# Local project data and agent state
+.spoq/
+.claude/
+.codex/
+.qwen/
+.cursor/
+.agents/
+journal.md
+TODO.yml
+
+# Credentials and machine configuration
+.env
+.env.*
+!.env.example
+.aws/
+*.pem
+*.key
+*.p12
+*.pfx
+.pypirc
+.netrc
+
+# Build, interpreter, test, and editor output
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+dist/
+build/
+output/
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.toc
+.DS_Store
+.idea/
+.vscode/

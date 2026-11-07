@@ -1,0 +1,4 @@
+interface:
+  display_name: "/spoq-plan-validation"
+  short_description: "Check planning readiness before implementation"
+  default_prompt: "Use $spoq-plan-validation on my saved SPOQ work."

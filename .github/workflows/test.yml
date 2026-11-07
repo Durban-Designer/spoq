@@ -1,0 +1,28 @@
+name: Source verification
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ['3.12', '3.14']
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install uv
+      - run: uv sync --project code/mcp/spoq-server --locked --python '${{ matrix.python }}'
+      - run: uv build --project code/mcp/spoq-server
+      - run: uv run --project code/mcp/spoq-server python -m compileall -q code/mcp/spoq-server/src
+      - run: uv run --project code/mcp/spoq-server python -m pytest code/mcp/spoq-server/tests tests -q
+  paper:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: sudo apt-get update && sudo apt-get install -y texlive-latex-recommended texlive-latex-extra texlive-science texlive-pictures texlive-fonts-recommended
+      - run: make -C documents/latex/projects/spoq-paper pdf

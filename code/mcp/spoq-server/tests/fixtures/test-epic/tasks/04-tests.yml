@@ -1,0 +1,35 @@
+id: 04-tests
+title: Integration Test Suite
+epic: test-epic
+status: pending
+priority: medium
+phase: 2
+
+dependencies:
+  - 03-api
+
+skills_required:
+  - jest
+  - pytest
+
+files_to_touch:
+  - tests/test_api.py
+
+acceptance_criteria:
+  - "[ ] API endpoint tests pass"
+  - "[ ] Config parser edge cases covered"
+  - "[ ] Test coverage above 80%"
+
+description: |
+  ## Objective
+  Write comprehensive integration tests covering the full validation pipeline.
+
+  ## Steps
+  1. Write pytest tests for API endpoints using httpx test client
+  2. Write edge case tests for config parser with malformed inputs
+  3. Measure and report test coverage with pytest-cov
+
+  ## Verification
+  ```bash
+  pytest tests/ --cov=src --cov-report=term-missing
+  ```

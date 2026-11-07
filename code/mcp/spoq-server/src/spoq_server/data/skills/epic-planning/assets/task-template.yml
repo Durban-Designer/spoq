@@ -1,0 +1,184 @@
+# Task Template
+# Copy this file and customize for each task in your epic
+
+id: XX-task-slug                    # Unique within epic, matches filename
+title: Human-readable Task Title    # Action-oriented: "Create X", "Implement Y"
+epic: epic-name                     # Must match parent directory name
+status: pending                     # pending | in_progress | qa | rework | completed | failed
+priority: medium                    # critical | high | medium | low
+phase: 1                            # Wave number for execution ordering
+
+dependencies:                       # List of task IDs that must complete first
+  - XX-prerequisite-task            # Only include direct dependencies
+  # - YY-another-task               # Remove this line if no dependencies
+
+skills_required:                    # Technical skills needed for this task
+  - java                            # Language skills
+  - spring-boot                     # Framework skills
+  - postgresql                      # Database skills
+  - docker                          # Infrastructure skills
+
+files_to_touch:                     # Files that will be created or modified
+  - code/apps/service/src/main/java/com/example/Service.java
+  - code/apps/service/src/test/java/com/example/ServiceTest.java
+  - infrastructure/sql/V001__migration.sql
+
+outputs:                            # Concrete deliverables
+  - Service class with CRUD operations
+  - Unit tests with >80% coverage
+  - Database migration applied
+  - API endpoint responding at /api/resource
+
+acceptance_criteria:                # Checklist for completion verification
+  - [ ] Code compiles without errors
+  - [ ] All unit tests pass: `./gradlew test`
+  - [ ] Integration test: `curl http://localhost:8080/api/resource` returns 200
+  - [ ] No security vulnerabilities: `npm audit` or `./gradlew dependencyCheckAnalyze`
+  - [ ] Documentation updated in README
+
+description: |
+  ## Objective
+
+  [One sentence describing what this task accomplishes and why it matters]
+
+  ## Prerequisites
+
+  Before starting this task, ensure:
+  - [Required service X is running]
+  - [Database Y is accessible]
+  - [API key Z is configured]
+  - [Previous task output exists]
+
+  ## Context
+
+  [Brief background on why this task exists, any relevant architectural decisions,
+  or references to design documents]
+
+  ## Steps
+
+  1. **Create the service class**
+     ```java
+     // Example code showing the pattern to follow
+     @Service
+     public class ExampleService {
+         // Implementation
+     }
+     ```
+     This establishes the foundation for the feature.
+
+  2. **Implement the repository**
+     ```java
+     @Repository
+     public interface ExampleRepository extends JpaRepository<Example, Long> {
+         // Custom queries
+     }
+     ```
+
+  3. **Add the controller endpoint**
+     ```java
+     @RestController
+     @RequestMapping("/api/example")
+     public class ExampleController {
+         // REST endpoints
+     }
+     ```
+
+  4. **Write unit tests**
+     ```java
+     @SpringBootTest
+     class ExampleServiceTest {
+         @Test
+         void shouldDoSomething() {
+             // Test implementation
+         }
+     }
+     ```
+
+  5. **Create database migration**
+     ```sql
+     CREATE TABLE example (
+         id BIGSERIAL PRIMARY KEY,
+         name VARCHAR(255) NOT NULL,
+         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+     );
+     ```
+
+  ## Verification
+
+  Run these commands to verify completion:
+
+  ```bash
+  # Build and test
+  ./gradlew clean build
+
+  # Start the application
+  ./gradlew bootRun
+
+  # Test the endpoint
+  curl -X GET http://localhost:8080/api/example
+  # Expected: {"status": "ok", "data": [...]}
+
+  curl -X POST http://localhost:8080/api/example \
+    -H "Content-Type: application/json" \
+    -d '{"name": "test"}'
+  # Expected: {"id": 1, "name": "test"}
+  ```
+
+  ## CRITICAL: Agent Execution Rules
+
+  **STOP AFTER 3 RETRIES**: If any command fails 3 times, STOP and report the error.
+  Do NOT enter infinite retry loops.
+
+  **CHECK BEFORE INSTALLING**: Verify dependencies exist before running install:
+  ```bash
+  # Good: Check first
+  grep -q '"package-name"' package.json && echo "Already installed" || npm install package-name
+
+  # Bad: Blind retry
+  npm install package-name  # Don't retry this 100 times
+  ```
+
+  **TRUST SUCCESS**: If a command exits with code 0, it succeeded. Move on.
+
+  **REPORT, DON'T SPIN**: If stuck, return this error:
+  "AGENT ERROR: Stuck in retry loop on [command]. Manual intervention required."
+
+  ## Error Handling
+
+  If the build fails:
+  ```bash
+  # Check for dependency issues (max 1 retry)
+  ./gradlew dependencies
+
+  # Clear cache and retry ONCE
+  ./gradlew clean build --refresh-dependencies
+  # If still fails, STOP and report error
+  ```
+
+  If the database migration fails:
+  ```bash
+  # Check migration status
+  ./gradlew flywayInfo
+
+  # Repair if needed (once)
+  ./gradlew flywayRepair
+  # If still fails, STOP and report error
+  ```
+
+  If tests fail:
+  ```bash
+  # Run specific test with debug output
+  ./gradlew test --tests "ExampleServiceTest" --info
+  # Analyze output, fix code, retry ONCE
+  # If still fails after fix, STOP and report error
+  ```
+
+  ## Related Tasks
+
+  - Depends on: [XX-prerequisite-task] - provides [what]
+  - Blocks: [YY-downstream-task] - needs [what] from this task
+
+  ## Notes
+
+  [Any additional context, decisions made during implementation,
+  or technical debt to track]

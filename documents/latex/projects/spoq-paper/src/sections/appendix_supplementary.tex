@@ -1,0 +1,1134 @@
+% Supplementary Material
+\section{Supplementary Material}
+\label{sec:supplementary}
+
+This appendix provides extended discussion, detailed examples, and supporting analysis
+referenced from the main text. Sections are ordered to follow the main paper's
+structure.
+
+% Ordering follows main text reference order:
+% A.1 Threshold Design Rationale (from Section 4)
+% A.2 Complete Metric Rubrics (from Section 4)
+% A.3 Implementation Details (from Section 5)
+% A.4 Integration Considerations (from Section 5)
+% A.5 Detailed Case Studies (from Section 6)
+% A.6 Failure Modes and Mitigations (from Section 6)
+% A.7 Evaluation Tables (from Section 6)
+% A.8 Cost Analysis and ROI Framework (from Section 6)
+% A.9 When to Use SPOQ (from Section 7)
+
+\subsection{Threshold Design Rationale}
+\label{subsec:threshold-rationale}
+
+The 95/90 (planning) and 95/80 (code) thresholds were chosen based on
+practical experience:
+
+\begin{itemize}
+    \item \textbf{95\% aggregate} ensures overall high quality while allowing
+    minor imperfections in individual metrics.
+
+    \item \textbf{90\% per-metric for planning} reflects that planning errors
+    propagate downstream. A plan with 70\% dependency graph quality will
+    cause execution failures regardless of other metrics.
+
+    \item \textbf{80\% per-metric for code} acknowledges legitimate tradeoffs.
+    A task might score 75\% on SOLID adherence for pragmatic reasons while
+    still being acceptable.
+
+    \item \textbf{Plans are cheap to fix.} Re-decomposing tasks costs human
+    time but no agent compute. Code rework costs both.
+\end{itemize}
+
+\subsection{Complete Metric Rubrics}
+\label{sec:appendix-metrics}
+
+This subsection provides detailed scoring rubrics for both validation gates.
+
+\subsubsection{Planning Validation Rubrics}
+
+\paragraph{Vision Clarity (VC).}
+\begin{itemize}
+    \item 100: Clear overview with problem statement, solution, scope boundaries,
+    and end state
+    \item 80: Clear overview, minor ambiguity in scope
+    \item 60: Overview present but vague
+    \item 40: Overview missing key context
+    \item 0: No overview or incomprehensible goal
+\end{itemize}
+
+\paragraph{Architecture Quality (AQ).}
+\begin{itemize}
+    \item 100: ASCII/visual diagram with all components, relationships, and data flow
+    \item 80: Diagram present, minor gaps in explanation
+    \item 60: Text-only architecture, no diagram
+    \item 40: Partial architecture description
+    \item 0: No architecture section
+\end{itemize}
+
+\paragraph{Task Decomposition (TD).}
+\begin{itemize}
+    \item 100: Atomic tasks (1--4h), independent where possible, complete coverage
+    \item 80: Good decomposition, minor overlap
+    \item 60: Some tasks too large or overlapping
+    \item 40: Significant decomposition issues
+    \item 0: Tasks not properly decomposed
+\end{itemize}
+
+\paragraph{Dependency Graph (DG).}
+\begin{itemize}
+    \item 100: Visual graph, all dependencies valid, no cycles, optimal ordering
+    \item 80: Graph present, dependencies valid, minor ordering improvements possible
+    \item 60: Text-only dependencies, all valid
+    \item 40: Some invalid dependencies or missing graph
+    \item 0: Circular dependencies or critically broken graph
+\end{itemize}
+
+\paragraph{Coverage Completeness (CC).}
+Score equals percentage of success criteria mapped to tasks:
+$\text{CC} = 100 \times \frac{|\text{covered criteria}|}{|\text{total criteria}|}$
+
+\paragraph{Phase Ordering (PO).}
+\begin{itemize}
+    \item 100: Phases follow logical progression, maximum parallelism exploited
+    \item 90: Good ordering, minor parallelism opportunities missed
+    \item 75: Ordering works but inefficient
+    \item 60: Some ordering violations
+    \item 0: Critical ordering errors (dependent tasks in same wave)
+\end{itemize}
+
+\paragraph{Scope Coherence (SC).}
+\begin{itemize}
+    \item 100: All tasks directly serve epic goal
+    \item 80: 1 tangential task
+    \item 60: 2--3 tangential tasks
+    \item 40: Multiple unrelated tasks
+    \item 0: Tasks don't align with epic goal
+\end{itemize}
+
+\paragraph{Success Criteria Quality (SQ).}
+\begin{itemize}
+    \item 100: All criteria SMART, checkbox format, testable
+    \item 90: Criteria measurable, minor gaps
+    \item 75: Some criteria vague
+    \item 60: Multiple unmeasurable criteria
+    \item 0: No success criteria or all vague
+\end{itemize}
+
+\paragraph{Risk Identification (RI).}
+\begin{itemize}
+    \item 100: Risks section with likelihood, impact, and mitigations
+    \item 90: Risks mentioned, implicit mitigations
+    \item 75: Some risks noted, no mitigations
+    \item 60: Risks not addressed
+    \item 0: Critical risks ignored
+\end{itemize}
+
+\paragraph{Integration Strategy (IS).}
+\begin{itemize}
+    \item 100: Clear integration points, verification steps between phases
+    \item 90: Integration implicit but clear
+    \item 75: Some integration points unclear
+    \item 60: Integration strategy missing
+    \item 0: Tasks cannot be integrated as designed
+\end{itemize}
+
+\subsubsection{Code Validation Rubrics}
+
+\paragraph{Syntactic Correctness (SC).}
+\begin{itemize}
+    \item 100: Compiles cleanly, 0 warnings
+    \item 80: Compiles with minor warnings
+    \item 60: Compiles with significant warnings
+    \item 0: Does not compile
+\end{itemize}
+
+\paragraph{Test Existence (TE).}
+Score equals percentage of new public methods with corresponding tests:
+$\text{TE} = 100 \times \frac{|\text{tested methods}|}{|\text{new public methods}|}$
+
+\paragraph{Test Pass Rate (TP).}
+Score equals percentage of tests passing:
+$\text{TP} = 100 \times \frac{|\text{passing tests}|}{|\text{total tests}|}$
+
+\paragraph{Requirements Fidelity (RF).}
+\begin{itemize}
+    \item 100: All requirements fully implemented
+    \item 80: All core requirements met, minor gaps
+    \item 60: Core requirements met, some missing
+    \item 40: Partial implementation
+    \item 0: Does not address requirements
+\end{itemize}
+
+\paragraph{SOLID Adherence (SA).}
+20 points per principle (S, O, L, I, D) based on degree of adherence.
+
+\paragraph{Security (SE).}
+Start at 100, deduct for OWASP Top 10 vulnerabilities:
+SQL injection ($-100$), command injection ($-100$), XSS ($-60$),
+broken auth ($-80$), sensitive data exposure ($-60$), etc.
+
+\paragraph{Error Handling (EH).}
+20 points each for: I/O wrapped in try-catch, meaningful error messages,
+proper logging, resource cleanup, safe user-facing errors.
+
+\paragraph{Scalability (SL).}
+Based on algorithm complexity of hot paths:
+O(1)/O(log n)/O(n) = 100, O(n log n) = 90, O(n$^2$) = 40, O(2$^n$) = 0.
+
+\paragraph{Code Clarity (CC).}
+\begin{itemize}
+    \item 100: Crystal clear, reads like well-written prose
+    \item 80: Clear with minor naming improvements possible
+    \item 60: Understandable but requires effort
+    \item 40: Confusing structure or naming
+    \item 0: Unreadable, magic numbers, cryptic names
+\end{itemize}
+
+\paragraph{Completeness (CO).}
+\begin{itemize}
+    \item 100: Complete, no loose ends
+    \item 80: Minor polish needed
+    \item 60: Some TODOs remain but core is done
+    \item 40: Significant unfinished sections
+    \item 0: Stub implementations, placeholders
+\end{itemize}
+
+Automatic deductions: TODO ($-25$), FIXME ($-25$), NotImplementedException ($-30$).
+
+\subsection{Implementation Details}
+\label{subsec:implementation-detail}
+
+This subsection provides complete schema examples, journal entry formatting, and
+skill metadata referenced from Section~\ref{sec:implementation}.
+
+\subsubsection{Epic Directory Structure}
+
+Each epic occupies its own directory under \texttt{spoq/epics/}:
+
+\begin{lstlisting}[language=bash,caption={Epic directory layout}]
+spoq/epics/
+  active/                   # Epics in progress
+    epic-name/
+      EPIC.md
+      tasks/
+        01-init-project.yml
+        ...
+  complete/                 # Finished epics
+  ROADMAP.md                # Priority tracker
+\end{lstlisting}
+
+The \texttt{EPIC.md} file provides context: goal statement, architecture diagrams,
+success criteria, dependency visualization, wave assignments, effort estimates,
+and risk assessment. Individual task files contain execution-ready specifications.
+
+\subsubsection{Task YAML Schema Examples}
+
+The task specification (Definition~\ref{def:task-spec}) organizes fields into
+three categories. The following listings illustrate each category with a
+representative task.
+
+\paragraph{Identity Fields.}
+These establish task context within an epic:
+
+\begin{lstlisting}[,caption={Task identity fields}]
+id: 04-content-constants       # Unique within epic
+title: Create Content Constants File
+epic: spoq-website             # Parent epic reference
+\end{lstlisting}
+
+\needspace{10cm}
+\paragraph{Execution Control Fields.}
+These govern scheduling, effort estimation, and dependency resolution:
+
+\begin{lstlisting}[,caption={Execution control fields}]
+status: pending                # pending | in_progress | completed
+priority: high                 # critical | high | medium | low
+phase: 1                       # Wave assignment (0 = no deps)
+
+estimate:                      # PERT three-point estimate
+  optimistic: 15m
+  realistic: 45m
+  pessimistic: 2h
+
+dependencies:                  # Task IDs that must complete first
+  - 01-init-project
+  - 02-setup-deps
+
+skills_required:               # Domain knowledge needed
+  - typescript
+  - react
+\end{lstlisting}
+
+\paragraph{Deliverable and Verification Fields.}
+These define expected outputs and acceptance criteria:
+
+\begin{lstlisting}[,caption={Deliverable and verification fields}]
+files_to_touch:                # All files to be modified
+  - src/lib/constants.ts
+  - tests/constants.test.ts
+
+outputs:                       # Tangible deliverables
+  - "Constants file with typed exports"
+  - "Unit tests achieving 100% coverage"
+
+acceptance_criteria:           # Verification checklist
+  - "[ ] TypeScript compiles without errors"
+  - "[ ] All tests pass: `npm test constants`"
+  - "[ ] No hardcoded strings in component files"
+\end{lstlisting}
+
+\needspace{12cm}
+\paragraph{Description Field.}
+The description provides structured implementation guidance using Markdown:
+
+\begin{lstlisting}[,caption={Task description structure}]
+description: |
+  ## Objective
+  Create a centralized constants file for UI strings.
+
+  ## Steps
+  1. Create src/lib/constants.ts with typed exports
+     ```typescript
+     export const SITE_NAME = "SPOQ" as const;
+     ```
+  2. Add unit tests in tests/constants.test.ts
+  3. Replace hardcoded strings in existing components
+
+  ## Verification
+  ```bash
+  npm run typecheck && npm test constants
+  ```
+\end{lstlisting}
+
+\needspace{4cm}
+\subsubsection{Journal Entry Format}
+
+Journal entries (Definition~\ref{def:journal-entry}) use YAML frontmatter
+followed by Markdown sections. The frontmatter captures machine-readable
+metadata:
+
+\begin{lstlisting}[,caption={Journal entry frontmatter}]
+---
+agent: Claude Code (Opus 4.5)
+start_time: 2025-11-01T10:52:34Z  # ISO 8601 UTC
+end_time: 2025-11-01T11:23:15Z
+confidence: 0.92                  # 0.0-1.0 calibration score
+session_type: development         # development | refactor | bugfix | ...
+files_modified:
+  - src/components/Hero.tsx
+  - tests/hero.test.tsx
+tasks_completed: 2
+tasks_total: 3
+---
+\end{lstlisting}
+
+\needspace{14cm}
+The body follows a standardized section layout for consistent parsing:
+
+\begin{lstlisting}[,caption={Journal entry body structure}]
+## Summary
+Brief 1-2 sentence overview of accomplishments.
+
+## Work Completed
+- Task 09: Hero section component
+- Task 10: Features grid with responsive layout
+
+## Changes Made
+**Frontend Components**
+- `Hero.tsx` - Implemented animated gradient background
+- `Features.tsx` - Added 6-card responsive grid
+
+## Issues Encountered
+None (or specific issues with resolutions)
+
+## Testing
+- Unit tests: PASS (12/12)
+- Integration tests: PASS (4/4)
+
+## Next Steps
+1. Implement call-to-action section
+2. Add accessibility attributes
+\end{lstlisting}
+
+\paragraph{Tooling Support.}
+SPOQ provides utility scripts for journal management:
+\begin{itemize}
+    \item \texttt{get-time.py}: Captures accurate UTC timestamps
+    \item \texttt{archive-journal.py}: Auto-archives when exceeding 1500 lines
+    \item \texttt{parse-to-db.py}: Extracts entries into SQLite for analysis
+    \item \texttt{create-mega-journal.py}: Consolidates archives for reporting
+\end{itemize}
+
+\subsubsection{Confidence Score Interpretation}
+
+\begin{table}[htbp]
+\centering
+\caption{Confidence Score Interpretation}
+\label{tab:confidence}
+\small
+\begin{tabular}{ll}
+\toprule
+\textbf{Score Range} & \textbf{Interpretation} \\
+\midrule
+0.95--1.0 & Thoroughly tested, production-ready \\
+0.85--0.94 & Well tested, minor edge cases possible \\
+0.75--0.84 & Functional, additional testing recommended \\
+0.65--0.74 & Works but requires validation \\
+$<$0.65 & Experimental or known issues present \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\needspace{4cm}
+\subsubsection{Skill Inventory}
+
+\begin{table}[htbp]
+\centering
+\caption{SPOQ Skill Inventory}
+\label{tab:skills}
+\small
+\begin{tabular}{llp{5cm}}
+\toprule
+\textbf{Skill} & \textbf{Stage} & \textbf{Purpose} \\
+\midrule
+epic-planning & Planning & Decompose goals into epics with dependency graphs \\
+epic-validation & Validation & Score epics against 10 planning metrics \\
+task-validation & Validation & Score individual tasks before execution \\
+agent-execution & Execution & Orchestrate parallel agent swarms \\
+agent-validation & Validation & Score completed work against 10 code metrics \\
+journal-tracker & Cross-cutting & Track sessions with confidence scores \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Skill Metadata and Invocation}
+
+Skills are invoked via slash commands that expand into full prompts:
+\begin{lstlisting}[language=bash,caption={Skill invocation examples}]
+# Plan a new epic
+/epic-planning "Implement user authentication system"
+
+# Validate before execution
+/epic-validation @spoq/epics/active/auth-system
+
+# Execute with parallel agents
+/agent-execution @spoq/epics/active/auth-system
+
+# Validate completed work
+/agent-validation
+\end{lstlisting}
+
+Each skill's \texttt{SKILL.md} includes YAML frontmatter specifying metadata:
+
+\needspace{6cm}
+\begin{lstlisting}[,caption={Skill metadata format}]
+---
+name: epic-planning
+description: Decompose high-level goals into structured epics
+             with atomic tasks and dependency DAGs.
+---
+\end{lstlisting}
+
+The body provides:
+\begin{itemize}
+    \item \textbf{When to Use:} Activation criteria
+    \item \textbf{Core Patterns:} Documented approaches with examples
+    \item \textbf{Quality Criteria:} Verification standards
+    \item \textbf{Integration Points:} Connections to other skills
+\end{itemize}
+
+\needspace{6cm}
+\subsection{Integration Considerations}
+\label{subsec:integration-detail}
+\label{subsec:tooling-integration}
+
+A recurring question from practitioners concerns SPOQ's integration
+with existing development infrastructure. We address this honestly:
+SPOQ currently operates as a standalone orchestration layer invoked
+via slash commands, without native integrations with external tools.
+However, its design accommodates several integration patterns.
+
+\paragraph{CI/CD Pipeline Patterns.}
+SPOQ's wave-based execution maps naturally to CI/CD pipeline stages.
+Wave 0 corresponds to setup and dependency installation, middle waves
+to parallel build and test jobs, and final waves to integration testing
+and deployment. In our infrastructure case study, the GitLab CI pipeline
+was updated as a task within the SPOQ epic itself, demonstrating that
+CI/CD configuration is orchestrable work rather than requiring special
+integration.
+
+For automated triggering, organizations could invoke SPOQ from pipeline
+scripts when epic YAML files change, treating the orchestrator as a
+build step. A GitLab CI job might monitor the \texttt{spoq/epics/}
+directory and trigger agent execution on detected changes. This pattern
+remains unexplored in our evaluation but represents a natural extension.
+GitHub Actions workflows could similarly invoke SPOQ as a step,
+potentially enabling fully automated epic execution on pull request events.
+
+\paragraph{Project Management Alignment.}
+SPOQ task YAML files parallel the structure of Jira stories and Linear
+issues: both contain titles, descriptions, acceptance criteria, and
+estimates. The structural similarity suggests bidirectional sync is
+feasible; a task defined in SPOQ could create a corresponding Jira
+ticket, and vice versa. However, SPOQ does not currently implement
+such synchronization, which may create duplicate tracking overhead
+for teams already committed to existing PM tools.
+
+The journal system partially addresses visibility by providing an
+audit trail of work completed, though it is designed for agent
+coordination rather than project management. Teams could export
+journal entries to their PM tools as a manual bridge, accepting
+the overhead until native integration warrants development investment.
+
+\paragraph{Git Workflow Recommendations.}
+Parallel agent execution raises questions about branch strategy.
+Our current approach uses a single working branch with agents
+operating on disjoint files, ensured by task \texttt{files\_to\_touch}
+specifications. This works well for up to 12 concurrent agents
+but may encounter contention at larger scales.
+
+For larger teams or epics with overlapping file modifications,
+we recommend git subtrees for epic isolation: each epic operates
+in its own subtree, with automated merges after validation gates
+pass. Feature branches per wave provide an alternative, with
+wave N's branch merging into main before wave N+1 begins. Both
+approaches add orchestration complexity but reduce merge conflicts.
+
+\paragraph{IDE Integration Possibilities.}
+SPOQ's slash-command interface suggests IDE integration opportunities.
+A VS Code extension could display the current epic's dependency graph,
+highlight files assigned to each task, and show validation scores
+in real time. JetBrains plugins could integrate journal entries
+into the project view, surfacing agent work history alongside
+version control logs.
+
+Such integrations remain future work. Our current implementation
+prioritizes methodology validation over tooling polish, reflecting
+a conscious choice to prove the approach before investing in
+developer experience enhancements.
+
+\paragraph{Future Integration Directions.}
+Several integration directions merit exploration:
+(1) native Jira/Linear/Asana adapters for bidirectional task sync;
+(2) Slack/Teams webhooks for wave completion notifications;
+(3) GitHub/GitLab API integration for automated PR creation per wave;
+(4) IDE extensions for real-time epic visualization.
+These would reduce friction for teams adopting SPOQ within established
+toolchains, though each adds maintenance burden. We advocate starting
+with SPOQ as a standalone layer, adding integrations only when
+adoption justifies the investment.
+
+\subsection{Detailed Case Studies}
+\label{subsec:case-study-detail}
+
+\subsubsection{Case Study 1: UI Improvements Epic}
+\label{subsubsec:ui-epic-detail}
+
+\paragraph{Epic Overview.}
+The UI improvements epic modernized a monitoring dashboard with toast
+notifications, data tables, and API key management components. The
+epic comprised 13 tasks across 2 waves.
+
+\paragraph{Wave Structure.}
+\begin{itemize}
+    \item \textbf{Wave 0 (12 tasks):} Independent component implementations
+    including Sonner setup, DataTable component, modal dialogs, toast
+    integrations, search functionality, and tests.
+    \item \textbf{Wave 1 (1 task):} End-to-end QA depending on all Wave 0 tasks.
+\end{itemize}
+
+\paragraph{Execution Metrics.}
+Table~\ref{tab:ui-metrics} summarizes the execution.
+
+\begin{table}[htbp]
+\centering
+\caption{UI Improvements Epic Execution}
+\label{tab:ui-metrics}
+\begin{tabular}{ll}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+Total tasks & 13 \\
+Wave 0 parallelism & 12 concurrent agents \\
+Wave 1 parallelism & 1 agent \\
+Sequential estimate & 18.5 hours \\
+Parallel estimate & 3.5 hours \\
+Speedup factor & 5.3$\times$ \\
+Tasks completed & 12 of 13 (92\%) \\
+Rework cycles & 2 (tasks 04, 07) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Failure Mode Encountered.}
+Task 04 entered a runaway retry loop, executing \texttt{npm install sonner}
+over 100 times. The agent failed to recognize that the dependency was
+already installed and continued retrying indefinitely.
+
+\paragraph{Lesson Learned.}
+SPOQ now enforces a maximum of 3 retries per installation command and
+requires agents to verify existing dependencies before installation attempts.
+
+\subsubsection{Case Study 2: Client Website Rebrand}
+\label{subsubsec:rebrand-epic-detail}
+
+\paragraph{Epic Overview.}
+This epic rebranded an external client's sales website (Pinpoint, a B2B QA
+testing platform) from founder-centric messaging to developer-focused
+positioning. The work included removing biographical content, rewriting
+homepage copy, creating three persona-specific landing pages, updating
+navigation and SEO metadata, and expanding the test suite. The epic comprised
+12 tasks across 4 waves and was executed on a codebase maintained by a
+separate engineering team.
+
+\paragraph{Wave Structure.}
+\begin{itemize}
+    \item \textbf{Wave 0 (2 tasks):} Content removal and routing scaffold
+    (parallel).
+    \item \textbf{Wave 1 (5 tasks):} Homepage rewrite, pricing update, and three
+    persona landing pages (parallel).
+    \item \textbf{Wave 2 (3 tasks):} Navigation, SEO, and section refinement
+    (parallel).
+    \item \textbf{Wave 3 (2 tasks):} Test expansion and accessibility polish
+    (parallel).
+\end{itemize}
+
+\paragraph{Execution Metrics.}
+Table~\ref{tab:rebrand-metrics} summarizes the execution.
+
+\begin{table}[htbp]
+\centering
+\caption{Client Rebrand Epic Execution}
+\label{tab:rebrand-metrics}
+\begin{tabular}{ll}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+Total tasks & 12 \\
+Max parallelism & 5 concurrent agents (Wave 1) \\
+Sequential estimate & 18 hours \\
+Parallel estimate & 6.5 hours \\
+Speedup factor & 2.8$\times$ \\
+Tasks completed & 12 of 12 (100\%) \\
+Orchestrator interventions & 3 \\
+Test suites / cases & 20 / 174 (0 failures) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\needspace{4cm}
+\paragraph{Test Fixture Synchronization.}
+All three orchestrator interventions involved test assertions falling out
+of sync with code changes made by parallel agents. In Wave 1, a pricing
+component gained new required props (\texttt{price}, \texttt{period}) that
+the existing accessibility test did not supply. In Wave 2, updated navigation
+links and SEO strings invalidated tab-order and metadata assertions. None of
+these were code defects; they were coordination gaps where one agent's
+changes invalidated another agent's test fixtures.
+
+\paragraph{Lesson Learned.}
+Structural component changes must propagate to all dependent test fixtures
+within the same wave. SPOQ now recommends treating test files as implicit
+dependents of the components they exercise, ensuring fixture updates are
+included in the same task that modifies the component interface.
+
+\subsection{Failure Modes and Mitigations (Detail)}
+\label{subsec:failure-modes-detail}
+
+The following subsections provide detailed analysis of each failure category
+identified during SPOQ development and deployment, with specific examples
+and comprehensive mitigation strategies.
+
+\subsubsection{Resource Contention Failures}
+\label{subsubsec:resource-contention-detail}
+
+\paragraph{Lock File Contention.}
+Multiple agents running \texttt{npm install} concurrently cause lock file
+conflicts, manifesting as \texttt{EBUSY} errors or corrupted \texttt{node\_modules}
+directories. In one deployment, three parallel agents attempted dependency
+installation simultaneously, resulting in a 12-minute debugging session.
+
+\textbf{Mitigation:} SPOQ designates a single Wave 0 task for dependency
+installation, with subsequent tasks assuming dependencies are available.
+Organizations should extend this pattern to any shared mutable resource:
+database migrations, cache warming, and artifact generation.
+
+\paragraph{Build Directory Conflicts.}
+Concurrent build processes can corrupt shared directories (e.g., \texttt{.next/},
+\texttt{dist/}, \texttt{target/}). Symptoms include partial builds, missing
+assets, and non-deterministic test failures.
+
+\textbf{Mitigation:} Build verification runs sequentially between waves, not
+during waves. For CI/CD integration, consider isolated build directories
+per agent or containerized build environments.
+
+\subsubsection{Context and Memory Failures}
+\label{subsubsec:context-memory-detail}
+
+\paragraph{Context Window Exhaustion.}
+Complex tasks with extensive codebase context can exhaust LLM context windows
+(currently 200K tokens for Claude). Symptoms include: agents losing track
+of earlier requirements, producing incomplete solutions, or generating
+responses that contradict prior instructions. In one knowledge-graph pipeline deployment, an agent
+with 180K tokens of context began hallucinating function signatures that
+did not exist in the codebase.
+
+\textbf{Mitigation:} Task descriptions should be self-contained, and the
+\texttt{files\_to\_touch} specification should limit scope to files the agent
+genuinely needs. For large codebases, consider:
+\begin{itemize}
+    \item Task-specific context manifests listing only relevant files
+    \item Summarization of peripheral code rather than full inclusion
+    \item Breaking complex tasks into sub-tasks with narrower scope
+    \item Context budget monitoring with alerts at 70\% utilization
+\end{itemize}
+
+\paragraph{Context Window Management.}
+Long QA feedback exhausted agent context windows. The 20-line remediation
+limit was introduced to ensure feedback remains actionable without
+consuming excessive context. Reviewers now prioritize critical issues
+and defer minor suggestions to follow-up tasks.
+
+\subsubsection{Agent Behavioral Failures}
+\label{subsubsec:agent-behavioral-detail}
+
+\paragraph{Runaway Detection.}
+Agents sometimes enter infinite loops on transient errors, repeatedly
+executing the same failing command. In Case Study 1, Task 04 entered a
+runaway retry loop, executing \texttt{npm install sonner} over 100 times
+before intervention.
+
+\textbf{Mitigation:} SPOQ monitors for repeated identical commands (5+
+occurrences) and halts with a human consultation request. Organizations
+should implement:
+\begin{itemize}
+    \item Command deduplication with exponential backoff
+    \item Per-task execution time limits (default: 30 minutes)
+    \item Anomaly detection for unusual command patterns
+\end{itemize}
+
+\paragraph{Validation Gaming.}
+Agents optimizing for validation metrics may produce code that passes
+automated checks while failing to address underlying requirements. Examples
+include: tests that assert \texttt{true === true}, implementations that
+short-circuit edge cases, and documentation that restates function signatures
+without explaining behavior.
+
+\textbf{Mitigation:} The dual validation framework addresses surface-level
+gaming through complementary metrics (test existence vs. test pass rate,
+syntactic correctness vs. requirements fidelity). However, sophisticated
+gaming requires human oversight:
+\begin{itemize}
+    \item Periodic human code review of high-complexity tasks
+    \item Mutation testing to verify test quality
+    \item Requirements traceability audits
+    \item Cross-validation between independent agents on critical paths
+\end{itemize}
+
+\paragraph{Dependency Resolution Failures.}
+Agents may specify incorrect dependency versions, introduce circular
+dependencies, or fail to recognize version conflicts. These failures often
+manifest only at runtime or during integration testing.
+
+\textbf{Mitigation:}
+\begin{itemize}
+    \item Lock files (\texttt{package-lock.json}, \texttt{Cargo.lock}) committed
+    after Wave 0 dependency installation
+    \item Dependency audit as part of code validation metrics
+    \item Version pinning policies enforced via task templates
+    \item Integration tests run at wave boundaries to detect compatibility issues
+\end{itemize}
+
+\needspace{4cm}
+\subsubsection{Coordination Failures}
+\label{subsubsec:coordination-detail}
+
+\paragraph{Agent Coordination Failures.}
+In parallel execution, agents may make conflicting assumptions about shared
+state. Example scenarios include:
+\begin{itemize}
+    \item Two agents independently creating the same utility function with
+    different signatures
+    \item An agent assuming a database table exists while another agent is
+    still creating it
+    \item Conflicting CSS class names or component identifiers
+\end{itemize}
+
+\textbf{Mitigation:} Wave boundaries serve as synchronization points.
+Additional measures include:
+\begin{itemize}
+    \item Explicit interface contracts defined in task prerequisites
+    \item Naming conventions specified in task templates
+    \item Linting rules to detect common conflict patterns
+    \item Post-wave merge verification before proceeding
+\end{itemize}
+
+\paragraph{Human Consultation Latency.}
+When agents request human consultation (HaaA), execution pauses until
+response. If the human is unavailable, this creates a bottleneck that
+can stall entire wave progressions.
+
+\textbf{Mitigation:}
+\begin{itemize}
+    \item Configurable timeout with fallback behavior (skip, abort, or
+    proceed with best-effort)
+    \item Escalation to secondary human reviewers
+    \item Asynchronous consultation queues for non-blocking requests
+    \item Clear documentation of expected response times per request priority
+\end{itemize}
+
+\subsubsection{Cost and Resource Failures}
+\label{subsubsec:cost-resource-detail}
+
+\paragraph{Cost Runaway Risk.}
+Without limits, agents retrying failed tasks or entering verbose output
+loops can rapidly consume API credits. A single runaway agent in Case Study 1
+consumed approximately \$15 in tokens before detection. Extrapolated to
+parallel execution with 10+ agents, uncontrolled failures could exceed
+\$100/hour.
+
+\textbf{Mitigation:}
+\begin{itemize}
+    \item Per-task token budgets (recommended: 50K input, 10K output for
+    standard tasks)
+    \item Per-epic cost caps with automatic suspension
+    \item Real-time cost monitoring dashboards with alerting
+    \item Graduated rate limiting: warning at 80\%, throttle at 90\%, halt
+    at 100\%
+\end{itemize}
+
+\needspace{4cm}
+\subsubsection{Security and Isolation Failures}
+\label{subsubsec:security-isolation-detail}
+
+\paragraph{Execution Isolation.}
+Agents execute commands in the host environment without sandboxing.
+Malformed or malicious code could damage the system, exfiltrate data,
+or consume resources. While LLM agents are unlikely to be intentionally
+malicious, hallucinated commands (e.g., \texttt{rm -rf /}) pose real risks.
+
+\textbf{Mitigation:}
+\begin{itemize}
+    \item Container-based execution (Docker) with ephemeral workspaces
+    \item Read-only filesystem mounts where possible
+    \item Network isolation for tasks that do not require external access
+    \item Resource limits (CPU, memory, disk quotas)
+    \item Command allowlisting for high-risk operations
+    \item Audit logging of all executed commands
+\end{itemize}
+
+\paragraph{Rollback and Recovery.}
+If agent work corrupts the codebase, recovery requires manual git operations.
+SPOQ does not currently implement automatic rollback, relying instead on
+git history and manual intervention.
+
+\textbf{Mitigation:}
+\begin{itemize}
+    \item Commit checkpoints at wave boundaries, enabling \texttt{git revert}
+    to known-good states
+    \item Branch-per-epic isolation with squash merge on completion
+    \item Automated backup before epic execution
+    \item Recovery runbooks documenting rollback procedures for common failures
+\end{itemize}
+
+\subsection{Evaluation Tables}
+\label{subsec:evaluation-tables}
+
+\needspace{8cm}
+\begin{table}[htbp]
+\centering
+\caption{Operational Risk Summary}
+\label{tab:risk-summary}
+\begin{tabular}{lll}
+\toprule
+\textbf{Risk Category} & \textbf{Detection Signal} & \textbf{Mitigation} \\
+\midrule
+Context exhaustion & Output truncation & Scope limits, context budgets \\
+Cost runaway & Token counter spikes & Per-task budgets with alerts \\
+Human bottleneck & Queue timeout & Configurable fallback \\
+Lock contention & EBUSY errors & Single-agent dep.\ install \\
+Validation gaming & High scores, low quality & Human review, mutation testing \\
+Agent conflicts & Merge failures & Interface contracts, wave sync \\
+Runaway loops & Repeated commands & Deduplication, time limits \\
+Security breach & Unauthorized commands & Container isolation, allowlists \\
+Data corruption & Test/build failures & Wave checkpoints, rollback \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{Evaluation Summary}
+\label{tab:summary}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Metric} & \textbf{UI Epic} & \textbf{Rebrand Epic} & \textbf{Adoption (agg.)} \\
+\midrule
+Tasks & 13 & 12 & 92 \\
+Waves & 2 & 4 & varies \\
+Max parallelism & 12 & 5 & 4 \\
+Speedup factor & 5.3$\times$ & 2.8$\times$ & 1.3--3.0$\times$ \\
+Completion rate & 92\% & 100\% & 100\% \\
+Orchestrator interventions & 1 & 3 & varies \\
+Rework cycles & 2 & 0 & 0--1 \\
+Test cases & --- & 174 & 295 \\
+Avg. confidence & --- & 0.92 & 0.90--0.95 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\clearpage
+\subsection{Cost Analysis and ROI Framework}
+\label{subsec:cost-analysis-detail}
+
+A critical consideration for SPOQ adoption is the economic viability of
+multi-agent orchestration. We analyze costs under two pricing models
+available for Claude API access as of February 2025.
+
+\paragraph{Pricing Model A: Per-Token API.}
+Table~\ref{tab:api-pricing} presents the current Claude API pricing structure
+and how each tier maps to SPOQ agent roles.
+
+\begin{table}[htbp]
+\centering
+\caption{Claude API Pricing by Model Tier}
+\label{tab:api-pricing}
+\begin{tabular}{lccl}
+\toprule
+\textbf{Model} & \textbf{Input} & \textbf{Output} & \textbf{SPOQ Role} \\
+\midrule
+Opus 4.6 & \$15/M tokens & \$75/M tokens & Worker agents \\
+Sonnet 4.5 & \$3/M tokens & \$15/M tokens & Reviewer agents \\
+Haiku 4.5 & \$0.25/M tokens & \$1.25/M tokens & Investigator agents \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Based on observed token consumption in our case studies, a typical Opus worker
+task consumes approximately 25,000 input tokens and 5,000 output tokens,
+yielding a per-task cost of approximately \$1.95. For an epic of 13 tasks
+(similar to our UI improvements study), the total worker cost reaches
+approximately \$28, excluding reviewer and investigator overhead.
+
+\paragraph{Pricing Model B: Flat-Rate Max Plan.}
+Anthropic's Max plan (\$200/month) provides 20$\times$ the usage allowance
+of a standard Claude Pro subscription. There is no platform-imposed limit on
+concurrent Claude Code instances; the practical ceiling is human attention.
+Crucially, usage is metered in two separate buckets: \emph{Opus} consumption
+and \emph{non-Opus} consumption (Sonnet, Haiku). This two-bucket structure
+makes SPOQ's three-tier agent hierarchy an economic optimization as well as
+a capability one; reserving Opus tokens for task execution while routing
+validation and triage through Sonnet and Haiku preserves Opus headroom for
+the work that demands it most.
+
+\begin{itemize}
+    \item \textbf{Fixed monthly cost} with predictable budgeting
+    \item \textbf{Concurrency:} unlimited instances; bounded only by the
+    two usage buckets and human supervisory bandwidth
+    \item \textbf{Tiered metering:} Opus budget for Workers; Sonnet/Haiku
+    budget for Reviewers and Investigators
+    \item \textbf{Daily capacity:} 50--100 tasks (assuming 4--6 task cycles
+    across active instances)
+    \item \textbf{Effective per-task cost:} \$0.10 at scale (100 tasks/day
+    $\times$ 20 working days)
+\end{itemize}
+
+At scale, the Max plan reduces per-task costs by approximately 20$\times$
+compared to per-token pricing, making aggressive parallelization economically
+viable on a single subscription.
+
+\clearpage
+\paragraph{The Director Model.}
+We propose a scaling paradigm we term the \emph{Director Model}, wherein a
+single human engineer orchestrates multiple Claude Code instances under one
+Max license:
+
+\begin{itemize}
+    \item \textbf{1 planning instance:} Assists with epic decomposition and
+    dependency analysis
+    \item \textbf{5 execution instances:} Each runs SPOQ's wave-based dispatch
+    with parallel sub-agents
+    \item \textbf{Daily output:} 50--100 completed tasks
+\end{itemize}
+
+In our experience, six concurrent instances represents the human
+multitasking limit; the usage buckets are rarely exhausted even at this
+level, leaving headroom for sustained parallel execution. This configuration
+enables a single engineer
+to achieve throughput equivalent to 5--8 traditional engineers, representing
+a qualitative shift in individual productivity potential.
+
+\paragraph{ROI Framework.}
+Table~\ref{tab:roi} presents a monthly ROI calculation for the Director Model
+at typical utilization.
+
+\begin{table}[htbp]
+\centering
+\caption{Director Model Monthly ROI Estimate}
+\label{tab:roi}
+\begin{tabular}{lr}
+\toprule
+\textbf{Component} & \textbf{Value} \\
+\midrule
+Monthly tasks completed & 2,000 (100/day $\times$ 20 days) \\
+Equivalent engineer output & 5--8 engineers \\
+Traditional cost (8 engineers @ \$12,500/mo) & \$100,000 \\
+Director Model cost (1 Max license) & \$200 \\
+Engineer salary (director) & \$12,500 \\
+Total Director Model cost & \$12,700 \\
+\midrule
+\textbf{Monthly savings} & \$87,300 \\
+\textbf{ROI multiplier} & 7.9$\times$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Under favorable assumptions (consistent utilization, stable task completion),
+the Director Model yields approximately 8$\times$ cost efficiency compared
+to traditional staffing.
+
+\paragraph{Caveats and Variability.}
+These estimates carry significant uncertainty:
+
+\begin{enumerate}
+    \item \textbf{Task complexity variance:} Our cost-per-task figures derive
+    from 1--4 hour tasks. Complex tasks requiring extended context windows or
+    multiple rework cycles can cost 3--5$\times$ the baseline.
+
+    \item \textbf{Rework overhead:} Failed validations requiring remediation
+    add approximately 40\% overhead on affected tasks.
+
+    \item \textbf{Output quality equivalence:} The ROI comparison assumes
+    agent-completed tasks are comparable in quality to human-authored work.
+    This equivalence has not been empirically validated; agent output may
+    require additional review or refinement that narrows the cost gap.
+
+    \item \textbf{Human supervision cost:} The Director Model assumes skilled
+    engineers capable of effective agent orchestration. Training and context-switching
+    costs are not included.
+
+    \item \textbf{API rate limits:} Per-token pricing may encounter rate limits
+    at high parallelism, while Max plan throughput is bounded by
+    the usage bucket allowances under sustained heavy parallelism.
+
+    \item \textbf{Quality vs. speed tradeoffs:} Higher parallelism may introduce
+    integration issues that offset time savings with debugging overhead.
+\end{enumerate}
+
+Despite these caveats, the order-of-magnitude cost advantage suggests that
+multi-agent orchestration represents an economically viable paradigm for
+software development at scale.
+
+\needspace{6cm}
+\subsection{When to Use SPOQ: Decision Framework}
+\label{subsec:usage-guidance-detail}
+
+SPOQ's structured approach introduces upfront overhead (task
+decomposition, YAML specification, dependency mapping, and validation
+gates) that pays off for certain project types but hinders others.
+This subsection provides decision guidance for practitioners.
+
+\paragraph{Appropriate Use Cases.}
+SPOQ adds value when:
+
+\begin{itemize}
+    \item \textbf{Structured features:} New functionality with clear
+    requirements spanning multiple components. When you can articulate
+    what needs to be built before starting, SPOQ's planning investment
+    translates into parallel execution benefits.
+
+    \item \textbf{Multi-file refactors:} Coordinated changes across a
+    codebase where parallelism accelerates delivery. Renaming a widely-used
+    interface, migrating to a new library, or restructuring module
+    boundaries benefit from explicit dependency tracking.
+
+    \item \textbf{Infrastructure work:} Terraform configurations, CI/CD
+    pipelines, and deployment automation have well-defined outputs
+    and benefit from explicit dependency specification.
+
+    \item \textbf{Team handoffs:} Projects requiring audit trails,
+    explainability for stakeholders, or handoffs between engineers
+    benefit from SPOQ's journal tracking and task documentation.
+
+    \item \textbf{Scale thresholds:} Our empirical data suggests SPOQ
+    provides net benefit for epics with 5+ tasks spanning 4+ hours
+    of estimated work. Below this threshold, orchestration overhead
+    often exceeds execution time.
+\end{itemize}
+
+\paragraph{Inappropriate Use Cases.}
+SPOQ's overhead exceeds its value when:
+
+\begin{itemize}
+    \item \textbf{Exploratory prototyping:} When requirements are
+    unclear and the goal is discovery, SPOQ's upfront planning becomes
+    a burden. Rapid iteration with a single agent or direct coding
+    serves exploration better.
+
+    \item \textbf{Small fixes:} Single-file bug fixes or minor changes
+    where task decomposition time exceeds execution time. A 10-minute
+    fix should not require 30 minutes of specification.
+
+    \item \textbf{Creative flow states:} Sessions where the developer
+    seeks direct engagement with code, what practitioners sometimes
+    call ``vibe coding'', benefit from immediacy, not delegation.
+    SPOQ assumes you want to orchestrate, not implement.
+
+    \item \textbf{Urgent hotfixes:} Time-critical patches where
+    validation gates delay resolution. When production is down,
+    skip the methodology and fix the problem directly.
+
+    \item \textbf{Learning exercises:} When the goal is understanding
+    a codebase or technology, doing the work yourself provides
+    education that delegation cannot.
+\end{itemize}
+
+\paragraph{Decision Framework.}
+A simple heuristic: if specifying tasks and dependencies would take
+longer than executing the work directly, SPOQ is likely overkill.
+Conversely, if you can identify 5+ subtasks with clear deliverables
+and the total estimated effort exceeds 4 hours, SPOQ's parallelism
+and quality gates typically justify the planning investment.
+
+Table~\ref{tab:when-to-use} summarizes common scenarios:
+
+\begin{table}[htbp]
+\centering
+\caption{SPOQ Applicability by Project Type}
+\label{tab:when-to-use}
+\footnotesize
+\begin{tabular}{lcp{6.5cm}}
+\toprule
+\textbf{Project Type} & \textbf{Use SPOQ?} & \textbf{Rationale} \\
+\midrule
+New feature (5+ files) & Yes & Parallelism benefits; quality gates prevent rework \\
+Single-file bug fix & No & Overhead exceeds benefit \\
+Exploratory prototype & No & Requirements unclear; planning premature \\
+Migration/refactor & Yes & Coordination critical; dependency tracking valuable \\
+Learning exercise & No & Flow state preferred; education through doing \\
+Production hotfix & No & Urgency trumps process \\
+Infrastructure epic & Yes & Well-defined outputs; explicit dependencies \\
+Documentation update & Depends & Multi-file: yes; single page: no \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Overhead vs.\ Payoff.}
+SPOQ's overhead includes: (1) epic planning and task decomposition
+(30--90 minutes), (2) YAML specification (5--10 minutes per task),
+(3) epic validation iteration (10--30 minutes), and (4) journal
+tracking and review (ongoing). For a 10-task epic, expect 2--3 hours
+of orchestration overhead.
+
+The payoff comes from: (1) parallel execution reducing wall-clock time,
+(2) validation gates catching issues before they cascade, (3) reduced
+context-switching as agents handle implementation details, and
+(4) audit trails simplifying review and handoffs. Across our case studies
+and adoption survey, speedups ranged from 1.3$\times$ to 5.3$\times$
+depending on dependency structure and parallelization potential.
+
+The break-even point varies by developer productivity and agent
+capability, but our experience suggests epics under 5 tasks rarely
+justify SPOQ's overhead, while epics over 15 tasks almost always do.
+The 5--15 task range requires judgment about parallelization potential
+and team coordination needs.

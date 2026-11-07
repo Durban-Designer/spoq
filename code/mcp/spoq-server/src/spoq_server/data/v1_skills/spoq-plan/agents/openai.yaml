@@ -1,0 +1,4 @@
+interface:
+  display_name: "/spoq-plan"
+  short_description: "Turn a goal into a validated SPOQ project plan"
+  default_prompt: "Use $spoq-plan to plan this goal and save its Feature and Task dependency graphs."

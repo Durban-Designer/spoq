@@ -1,0 +1,117 @@
+% Introduction
+\section{Introduction}
+\label{sec:introduction}
+
+The emergence of large language models (LLMs) capable of generating, understanding,
+and reasoning about code has sparked intense interest in multi-agent systems for
+software engineering automation \citep{li2023chatdev, hong2023metagpt}. These systems
+promise to decompose complex software projects into subtasks, assign them to specialized
+agents, and coordinate their execution toward a unified goal. Early results demonstrate
+that multi-agent collaboration can produce functioning software artifacts, from simple
+games to multi-file applications \citep{qian2023chatdev}.
+
+However, current multi-agent approaches face three fundamental challenges:
+
+\paragraph{Coordination Overhead.} Systems like ChatDev \citep{qian2023chatdev} and
+MetaGPT \citep{hong2023metagpt} rely on sequential role-playing or message-passing
+between agents, creating bottlenecks that limit parallelism. When Agent A must wait
+for Agent B's output before proceeding, potential speedups from parallel execution
+remain unrealized.
+
+\paragraph{Quality Control Gaps.} Most multi-agent systems lack structured validation
+between planning and execution phases. Agents execute plans without rigorous assessment
+of plan quality, leading to wasted computation when fundamental flaws are discovered
+late. Similarly, post-execution quality assessment is often informal or absent.
+
+\paragraph{Limited Human Oversight.} Fully autonomous multi-agent systems exclude
+human judgment from the loop, missing opportunities to leverage human expertise for
+task decomposition, ambiguity resolution, and quality assessment. When agents
+encounter edge cases or make suboptimal decisions, there is no mechanism for
+human correction.
+
+\subsection{SPOQ: Our Approach}
+
+We introduce \textbf{SPOQ} (Specialist Orchestrated Queuing), a methodology that
+addresses these challenges through three integrated innovations:
+
+\begin{enumerate}
+    \item \textbf{Wave-Based Topological Dispatch:} We model task dependencies as a
+    directed acyclic graph (DAG), a structure where arrows show which tasks must
+    complete before others can begin, with no circular dependencies (think of it
+    as a flowchart where all arrows point forward). We then compute execution
+    \textit{waves} (groups of independent tasks) via topological sort. Tasks within
+    the same wave execute in parallel, while waves execute sequentially to respect
+    dependencies. This maximizes parallelism without coordination overhead.
+
+    \item \textbf{Dual Validation Gates:} We apply structured validation (quality
+    checkpoints with scored metrics) at two points: \textit{before} execution
+    (planning validation with 10 metrics) and \textit{after} execution (code
+    validation with 10 metrics). Each gate enforces a 95\% threshold, catching
+    quality issues when they are cheapest to fix.
+
+    \item \textbf{Human-as-an-Agent (HaaA):} A human specialist participates alongside
+    AI agents, not as a passive observer, but as an active collaborator who
+    decomposes tasks, validates plans, and can be consulted during execution.
+    This bidirectional integration treats the human as a high-value agent within
+    the system.
+\end{enumerate}
+
+\subsection{Contributions}
+
+This paper makes the following contributions:
+
+\begin{itemize}
+    \item A formal framework for wave-based multi-agent orchestration that
+    computes parallel execution waves from task dependency
+    graphs~(Section~\ref{sec:methodology})
+
+    \item A three-tier agent hierarchy (Opus/Sonnet/Haiku) that optimizes
+    cost-quality tradeoffs by matching model capability to task
+    complexity~(Section~\ref{subsec:agent-hierarchy})
+
+    \item The Human-as-an-Agent (HaaA) paradigm for structured task
+    decomposition through bidirectional human-AI
+    collaboration~(Section~\ref{subsec:haaa})
+
+    \item A dual validation system with explicit metrics that scores both
+    planning quality and code quality against quantified
+    thresholds~(Section~\ref{sec:validation})
+
+    \item A controlled benchmark suite testing four research questions:
+    scheduling efficiency, planning quality, validation effectiveness, and
+    human-AI collaboration. Wave dispatch reaches the critical-path lower
+    bound (ratio 1.03--1.11, up to 14.3$\times$ speedup) on unbounded
+    synthetic DAGs and delivers a stable 1.4$\times$ speedup matching the
+    hardware ceiling on a 2-slot local backend;
+    structured planning lifts coverage to 99.75 and parallelism to 75.25;
+    dual validation reduces defects from 0.34 to 0.20 per task; and
+    Human-as-Agent planning further reduces defects to 0.03 per task with
+    99.75\% test pass rate~(Section~\ref{sec:evaluation})
+
+    \item A cross-provider replication of all four experiments against a
+    locally hosted open-weights model (Qwen3.6-35B-A3B served via
+    \texttt{llama.cpp}). The direction and significance of the SPOQ gains
+    are preserved across provider families, supporting the claim that the
+    improvements stem from orchestration rather than from a specific
+    model's capabilities~(Section~\ref{sec:evaluation})
+
+    \item A longitudinal deployment study across 17 repositories, 8{,}589
+    commits, 1{,}822 completed tasks, and 13{,}866 executed tests
+    (99.87\% aggregate pass rate) demonstrating ecological validity,
+    third-party adoption, and operational viability at
+    scale~(Section~\ref{sec:evaluation})
+\end{itemize}
+
+\begin{glossarybox}[Key Terms at a Glance]
+\begin{description}
+\item[Epic:] A high-level goal decomposed into atomic tasks, each with explicit dependencies, acceptance criteria, and time estimates.
+\item[Wave:] A group of tasks sharing no mutual dependencies, enabling simultaneous execution by multiple agents within a single phase.
+\item[DAG:] Directed Acyclic Graph, a structure where arrows represent prerequisite relationships between tasks, with no circular dependencies.
+\item[Critical Path:] The longest sequential chain of dependent tasks through the DAG; determines the minimum possible project duration.
+\item[Validation Gate:] A scored quality checkpoint where work must exceed defined metric thresholds before the pipeline advances to the next stage.
+\item[HaaA (Human-as-an-Agent):] A bidirectional collaboration paradigm where humans participate alongside AI agents as active contributors.
+\item[PERT Estimates:] Three-point time estimates capturing optimistic, realistic, and pessimistic durations to quantify scheduling uncertainty.
+\end{description}
+\end{glossarybox}
+
+\newpage

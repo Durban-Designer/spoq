@@ -1,0 +1,4 @@
+interface:
+  display_name: "/spoq-execution"
+  short_description: "Execute saved work through verified completion"
+  default_prompt: "Use $spoq-execution on my saved SPOQ work."

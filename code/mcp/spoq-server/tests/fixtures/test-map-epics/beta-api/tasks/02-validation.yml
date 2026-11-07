@@ -1,0 +1,34 @@
+id: 02-validation
+title: Input Validation Routes
+epic: beta-api
+status: pending
+priority: high
+phase: 1
+
+dependencies:
+  - 01-endpoints
+
+skills_required:
+  - python
+  - fastapi
+
+files_to_touch:
+  - src/validators.py
+
+acceptance_criteria:
+  - "[ ] Validation endpoint checks schema conformance"
+  - "[ ] Error responses include field-level details"
+
+description: |
+  ## Objective
+  Add validation routes that check input data against the schema definitions.
+
+  ## Steps
+  1. Create validation middleware
+  2. Add schema checking logic
+  3. Return structured error responses
+
+  ## Verification
+  ```bash
+  python -m pytest tests/test_validation.py
+  ```
