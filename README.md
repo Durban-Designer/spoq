@@ -14,7 +14,7 @@ records how discovery, design, review, planning and delivery proceed.
 Python 3.12 or newer is required. To install the already-published distribution:
 
 ```bash
-pipx install spoq==1.1.0
+pipx install spoq==1.1.1
 spoq init --target /path/to/project --with-mcp --agents claude,codex
 ```
 
@@ -106,10 +106,13 @@ workloads, rather than new performance measurements of 1.1.
 
 This repository retains its curated history beginning at the 1.0 snapshot. It
 omits optional commercial HTTP integrations that exist in the immutable PyPI
-1.0.0/1.1.0 distributions. A wheel built from this checkout identifies as 1.1.0
+1.0.0/1.1.0/1.1.1 distributions. A wheel built from this checkout identifies as 1.1.1
 but is a **curated source edition**, not a byte-identical reconstruction of the
 published PyPI wheel. This update does not replace or republish those artifacts.
-Package publication and repository visibility changes are not automated by CI.
+The 1.1.1 patch corrects repository metadata while preserving the 1.1.0 runtime.
+The full PyPI patch is built separately from the existing published source archive;
+this curated build must not replace that full distribution. Package publication
+and repository visibility changes are not automated by CI.
 
 MIT license. Attribution and citation metadata remain in [LICENSE](LICENSE)
 and [CITATION.cff](CITATION.cff).

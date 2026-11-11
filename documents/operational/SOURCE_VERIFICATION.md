@@ -96,3 +96,44 @@ No authenticated Claude/Codex model call or native Windows/macOS test was run.
 Browser checks used host Chromium; no broad cross-browser or new performance
 claim is made. Historical paper text and nonfatal TeX box warnings remain; the
 unchanged paper did not receive a new full-page visual typography audit.
+
+
+## 1.1.1 repository metadata correction — 2026-11-11
+
+The patch advances release metadata to1.1.1 so repository links can identify the
+public GitHub source. The full PyPI patch is built separately from its existing
+full1.1.0 source archive, retaining every runtime compatibility module. The curated
+source edition retains its intentional exclusions; its build must not replace
+that full distribution. PyPI1.1.1's registry JSON is the authority for full-release
+digests; the curated artifact hashes below describe this checkout only.
+
+Package/viewer versions and provenance stamps changed. Actual Vite rebuild and
+Python asset verification succeeded while compiled JS/CSS stayed byte-identical.
+Every production Python body, all contributor viewer source and dependency pins
+(except the root distribution's version) also match the reviewed1.1.0 baseline.
+Current-release artifact discovery, version assertions and CI artifact paths are
+release-aware; historical strategy/schema/fixture versions remain unchanged.
+
+| Check | Observed result |
+|---|---|
+| Focused metadata/version/assets/dependency/source-boundary tests | 68 passed; no skips |
+| Built wheel and sdist Repository Project-URL regression | GitHub URL required; GitLab rejected |
+| Wheel runtime payload parity | All76 packaged Python/JS/CSS paths byte-identical |
+| Checkout runtime/viewer parity | All97 selected source and compiled paths unchanged |
+| Lock consistency | Pass; only root version changes |
+| Viewer rebuild, fingerprint and format | Passed |
+| Fresh installed Classic CLI/PIQARD MCP/fault/recovery driver | Passed |
+| Fresh installed packaged viewer/actual browser | Passed |
+
+Broader1597-source/1593-installed1.1.0 evidence remains a baseline with exact
+runtime/dependency identity, rather than a claim that those full suites were
+rerun locally for1.1.1. The focused patch checks and fresh installed runtime
+checks above cover the changed metadata/stamp surface; GitHub CI runs the full
+current source/installed suites on the final commit. Existing model/platform and
+browser limitations remain unchanged.
+
+Curated1.1.1 wheel SHA-256:
+`c73a07095605bed8efda0ab0fe8ee6f7088e25414c11f89933982fafebe80941`.
+Curated1.1.1 sdist SHA-256:
+`5e752b6b8e1412edb14b99e5238fb64b5bbe559bc336efa61d94501c96e64be4`.
+These are intentionally distinct from the separately rebuilt full PyPI patch.

@@ -27,6 +27,9 @@ import spoq_server
 
 
 PACKAGE = Path(str(files('spoq_server')))
+RELEASE_VERSION = spoq_server.__version__
+WHEEL_NAME = f'spoq-{RELEASE_VERSION}-py3-none-any.whl'
+SDIST_NAME = f'spoq-{RELEASE_VERSION}.tar.gz'
 CHECKOUT = next((p for p in Path(__file__).resolve().parents
                  if (p / 'code/mcp/spoq-server/pyproject.toml').is_file()), None)
 SPOQ_SKILLS = {'spoq', 'spoq-plan', 'spoq-plan-validation', 'spoq-execution',
@@ -76,8 +79,8 @@ def payload(path):
 
 
 def find_distribution_pair(directory, *, explicit=False):
-    directories = [directory] if explicit else sorted({p.parent for p in directory.rglob('spoq-1.1.0-py3-none-any.whl')})
-    pairs = [(d / 'spoq-1.1.0-py3-none-any.whl', d / 'spoq-1.1.0.tar.gz') for d in directories]
+    directories = [directory] if explicit else sorted({p.parent for p in directory.rglob(WHEEL_NAME)})
+    pairs = [(d / WHEEL_NAME, d / SDIST_NAME) for d in directories]
     complete = [pair for pair in pairs if all(p.is_file() for p in pair)]
     if not complete:
         if explicit:
@@ -107,24 +110,24 @@ def test_current_ci_pair_is_discovered_deterministically(tmp_path):
     for directory, timestamp in [('1.1.0', 1), ('release-ci', 3), ('incomplete', 99)]:
         parent = tmp_path / directory
         parent.mkdir()
-        names = ['spoq-1.1.0-py3-none-any.whl', 'spoq-1.1.0.tar.gz']
+        names = [WHEEL_NAME, SDIST_NAME]
         for name in names[:1] if directory == 'incomplete' else names:
             path = parent / name
             path.write_bytes(b'Fixture name only; no archive parsing in discovery')
             os.utime(path, ns=(timestamp, timestamp))
-    expected = (tmp_path / 'release-ci/spoq-1.1.0-py3-none-any.whl', tmp_path / 'release-ci/spoq-1.1.0.tar.gz')
+    expected = (tmp_path / 'release-ci' / WHEEL_NAME, tmp_path / 'release-ci' / SDIST_NAME)
     assert find_distribution_pair(tmp_path) == expected
     assert find_distribution_pair(tmp_path) == expected
 
 
 def test_explicit_incomplete_distribution_pair_cannot_silently_skip(tmp_path):
-    (tmp_path / 'spoq-1.1.0-py3-none-any.whl').write_bytes(b'Incomplete fixture')
+    (tmp_path / WHEEL_NAME).write_bytes(b'Incomplete fixture')
     with pytest.raises(ValueError, match='required wheel/sdist pair'):
         find_distribution_pair(tmp_path, explicit=True)
 
 
 def test_current_installed_package_has_all_declared_public_resources():
-    assert spoq_server.__version__ == version('spoq') == '1.1.0'
+    assert spoq_server.__version__ == version('spoq') == RELEASE_VERSION
     actual = payload(PACKAGE)
     assert {name.split('/')[2] for name in actual
             if name.startswith('data/v1_skills/') and name.endswith('/SKILL.md')} == SPOQ_SKILLS | {'agent-collaboration'}
@@ -138,14 +141,14 @@ def test_current_installed_package_has_all_declared_public_resources():
     assert {name for name in actual if name.startswith('data/strategies/')} == {
         'data/strategies/classic.json', 'data/strategies/piqard.json', 'data/strategies/schema.json'}
     manifest = json.loads(actual['data/ui/manifest.json'])
-    assert manifest['version'] == '1.1.0'
+    assert manifest['version'] == RELEASE_VERSION
     assert {name.removeprefix('data/ui/') for name in actual if name.startswith('data/ui/')} == set(manifest['files']) | {'manifest.json'}
 
 
 def test_wheel_sdist_payloads_match_the_actual_installed_and_checkout_resources(distribution_pair):
     installed = payload(PACKAGE)
     for path, archive in distribution_pair:
-        prefix = 'spoq_server/' if path.suffix == '.whl' else 'spoq-1.1.0/src/spoq_server/'
+        prefix = 'spoq_server/' if path.suffix == '.whl' else f'spoq-{RELEASE_VERSION}/src/spoq_server/'
         bundled = {name.removeprefix(prefix): body for name, body in archive.items()
                    if name.startswith(prefix) and any(name.removeprefix(prefix).startswith(d + '/') for d in PAYLOAD_DIRS)}
         assert bundled == installed
@@ -155,14 +158,24 @@ def test_wheel_sdist_payloads_match_the_actual_installed_and_checkout_resources(
 
 def test_distribution_metadata_identifies_the_intended_release(distribution_pair):
     for path, archive in distribution_pair:
-        metadata_name = 'spoq-1.1.0.dist-info/METADATA' if path.suffix == '.whl' else 'spoq-1.1.0/PKG-INFO'
+        metadata_name = f'spoq-{RELEASE_VERSION}.dist-info/METADATA' if path.suffix == '.whl' else f'spoq-{RELEASE_VERSION}/PKG-INFO'
         metadata = BytesParser().parsebytes(archive[metadata_name])
-        assert metadata['Name'] == 'spoq' and metadata['Version'] == '1.1.0'
+        assert metadata['Name'] == 'spoq' and metadata['Version'] == RELEASE_VERSION
         assert metadata['Requires-Python'] == '>=3.12'
         if path.suffix == '.whl':
             entry_points = next(body.decode() for name, body in archive.items()
                                 if name.endswith('/entry_points.txt'))
             assert 'spoq = spoq_server.cli:main' in entry_points
+
+
+def test_built_metadata_links_to_the_public_curated_repository(distribution_pair):
+    for path, archive in distribution_pair:
+        name = (f'spoq-{RELEASE_VERSION}.dist-info/METADATA' if path.suffix == '.whl'
+                else f'spoq-{RELEASE_VERSION}/PKG-INFO')
+        metadata = BytesParser().parsebytes(archive[name])
+        urls = dict(value.split(', ', 1) for value in metadata.get_all('Project-URL', []))
+        assert urls['Repository'] == 'https://github.com/Durban-Designer/spoq'
+        assert not any('gitlab.com' in value for value in metadata.get_all('Project-URL', []))
 
 
 @pytest.mark.parametrize('name', ['../secret', '/private/key', 'spoq_server/.spoq/spoq.db',
@@ -303,7 +316,7 @@ def test_python_and_contributor_viewer_versions_and_locks_align():
     project = tomllib.loads((root / 'code/mcp/spoq-server/pyproject.toml').read_text())
     lock = tomllib.loads((root / 'code/mcp/spoq-server/uv.lock').read_text())
     expected = project['project']['version']
-    assert expected == '1.1.0'
+    assert expected == RELEASE_VERSION
     assert project['project']['urls']['Repository'] == 'https://github.com/Durban-Designer/spoq'
     assert next(p['version'] for p in lock['package'] if p['name'] == 'spoq') == expected
     package = json.loads((root / 'code/apps/spoq-ui/package.json').read_text())

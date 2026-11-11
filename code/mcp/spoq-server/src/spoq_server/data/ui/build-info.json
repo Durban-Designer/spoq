@@ -1,10 +1,10 @@
 {
   "format": "spoq-ui-build-1",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "files": {
     "index.html": "16db825851640fad3027164e3bf0cb16aacf15420add1e36ec26dbc82c40eeca",
-    "package-lock.json": "bf91a722db21388c0c41f47cd2a1b5104cce438de9b79bea074ad4ea4f03e0ab",
-    "package.json": "a75a35a398fbe46fa4f776629d08182a3f16e8fc799551851a9f0c447c1cbd15",
+    "package-lock.json": "f49cc7e5aa3b9927fe15b5883f9569d6089779c834b49590d6d27a8e459b5229",
+    "package.json": "63efbb6eca558c76c5017a78c0c0725064dae57cf2bc896aecc07fc73124ec67",
     "public/spoq.svg": "3d3cfe5c9947861181a134fc068baf2283cdec94fdecc6fd7f67dc327b8b537e",
     "scripts/source-hash.mjs": "45e9160e745c2d4e94e1d36685f63b8bc8a46452a2c25ef6ac1d2399796d5a26",
     "src/AccessibleRunList.tsx": "34860432bc5eac43b5711a46517118abadfc7aed40a87872ed2103fcf80b9f20",
@@ -24,5 +24,5 @@
     "tsconfig.json": "59c2f3a9dc654a10cda85a585097fce349afe3b1da052c4f1e5159ab5ab13f90",
     "vite.config.ts": "ac90a769c9483eb67d14b06c9c741e8c27d81ca0484184185151e2705a87a46a"
   },
-  "source_sha256": "4c5d6f3702144cebe0aa33e1dea64db7b68320fa9645dae22418c50fdbfc6e9b"
+  "source_sha256": "9090e11ef401d99fcf975ced282f519fe64704d005465abed43400a5acdaa487"
 }

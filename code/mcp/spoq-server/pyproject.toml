@@ -1,6 +1,6 @@
 [project]
 name = "spoq"
-version = "1.1.0"
+version = "1.1.1"
 description = "SPOQ: Multi-agent AI orchestration with wave-based parallel execution and quality gates"
 requires-python = ">=3.12"
 license = "MIT"

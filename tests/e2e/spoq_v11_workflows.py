@@ -318,7 +318,9 @@ def install(artifact,out,python='3.12'):
     executable=prefix/('Scripts/python.exe' if os.name=='nt' else 'bin/python')
     rt=InstalledRuntime(executable,out,out/'setup',expected_prefix=prefix)
     origin=rt.run([executable,'-I',SCRIPT,'--origin',str(prefix)],'origin',cwd=out)
-    assert origin['version']=='1.1.0'
+    # Artifact selection is release metadata; strategy schema versions remain pinned.
+    expected = Path(artifact).name.removeprefix('spoq-').removesuffix('-py3-none-any.whl').removesuffix('.tar.gz')
+    assert origin['version'] == expected
     rt.run(['uv','pip','check','--python',executable],'dependencies',cwd=out)
     return executable,prefix,origin
 

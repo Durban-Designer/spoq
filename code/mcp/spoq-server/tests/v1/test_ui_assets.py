@@ -183,7 +183,7 @@ def test_manifest_corruption_is_rejected(frontend, builder, tmp_path, change):
 
 def test_actual_packaged_ui_has_verified_local_assets_and_no_test_data():
     root, manifest = load_assets()
-    assert manifest['version'] == __version__ == '1.1.0'
+    assert manifest['version'] == __version__
     assert {'index.html', 'build-info.json', 'licenses.txt', 'spoq.svg'} <= manifest['files'].keys()
     html = (root / 'index.html').read_text()
     assert 'https://' not in html and 'http://' not in html

@@ -28,7 +28,7 @@ jobs:
         working-directory: code/apps/spoq-ui
       - run: npm --prefix code/apps/spoq-ui run test:e2e
       - run: uv build --project code/mcp/spoq-server
-      - run: python tests/e2e/spoq_v11_viewer.py --artifact code/mcp/spoq-server/dist/spoq-1.1.0-py3-none-any.whl --out tests/e2e/results/ci-viewer
+      - run: python tests/e2e/spoq_v11_viewer.py --artifact code/mcp/spoq-server/dist/spoq-*-py3-none-any.whl --out tests/e2e/results/ci-viewer
   python:
     needs: viewer
     runs-on: ubuntu-latest
@@ -50,9 +50,9 @@ jobs:
       - run: uv build --project code/mcp/spoq-server
       - run: uv run --project code/mcp/spoq-server python -m compileall -q code/mcp/spoq-server/src
       - run: uv run --project code/mcp/spoq-server --extra search --extra codex python -m pytest code/mcp/spoq-server/tests tests -q
-      - run: python tests/e2e/spoq_release.py --python '${{ matrix.python }}' --artifact code/mcp/spoq-server/dist/spoq-1.1.0-py3-none-any.whl --extras search,codex --out tests/e2e/results/ci-installed
+      - run: python tests/e2e/spoq_release.py --python '${{ matrix.python }}' --artifact code/mcp/spoq-server/dist/spoq-*-py3-none-any.whl --extras search,codex --out tests/e2e/results/ci-installed
       - if: matrix.python == '3.12'
-        run: python tests/e2e/spoq_v11_workflows.py --artifact code/mcp/spoq-server/dist/spoq-1.1.0-py3-none-any.whl --out tests/e2e/results/ci-workflows
+        run: python tests/e2e/spoq_v11_workflows.py --artifact code/mcp/spoq-server/dist/spoq-*-py3-none-any.whl --out tests/e2e/results/ci-workflows
   paper:
     runs-on: ubuntu-latest
     steps:

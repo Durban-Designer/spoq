@@ -55,3 +55,18 @@ metadata, aggregate observations and named adopter/acknowledgments are preserved
 The owner requested public promotion after the private review period. Automated
 boundary and secret scans supplement that authorization; they do not establish
 ownership rights or independently prove every research claim.
+
+
+## 1.1.1 repository metadata patch
+
+This curated checkout advances its package/viewer release metadata to 1.1.1.
+Production Python bodies, contributor viewer source and compiled JS/CSS are
+unchanged from the reviewed1.1.0 snapshot. Only version/build-provenance stamps,
+release-aware verification/CI and current installation/provenance text change.
+Strategy schema/template versions and historical fixtures retain their meanings.
+
+The separately built full PyPI1.1.1 patch corrects Project-URL repository metadata
+without removing any runtime module from the original full1.1.0 distribution.
+The curator's existing commercial adapter/import exclusions remain unchanged;
+therefore this checkout's wheel is not the artifact to upload as that full patch.
+No dependency pins were changed beyond the root distribution version.

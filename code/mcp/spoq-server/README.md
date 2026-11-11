@@ -4,7 +4,7 @@ SPOQ 1.1 stores Project Plans, Features, Tasks, journals, claims, conversations 
 workflow history in local SQLite. It exposes 47 MCP tools and a matching CLI.
 
 ```bash
-pipx install spoq==1.1.0
+pipx install spoq==1.1.1
 spoq init --target /path/to/project --with-mcp --agents claude,codex
 spoq mcp --root /path/to/project
 ```
@@ -25,8 +25,13 @@ the local app-server bridge. Keyword search needs no embedding model. This
 curated source keeps `SPOQ_STORE=fs` legacy compatibility and excludes commercial
 HTTP adapters/import commands. Unsupported backend selection fails explicitly.
 
-The curated source edition is version 1.1.0 and intentionally differs from the
-immutable PyPI 1.1.0 package because excluded commercial integrations stay absent.
+The curated source edition is version 1.1.1 and intentionally differs from the
+immutable full PyPI packages because excluded commercial integrations stay absent.
 Building this source does not overwrite or republish an existing PyPI artifact.
 Run `uv sync --locked`, `uv build` and `uv run pytest` in this directory; the
 repository root documents reproducible viewer builds and all verification steps.
+
+The 1.1.1 patch changes release/repository metadata only. Its Python runtime and
+compiled viewer JS/CSS remain identical to this curated repository's 1.1.0 release.
+The full PyPI patch is rebuilt separately from the original full distribution,
+including the compatibility adapters intentionally absent from this checkout.
