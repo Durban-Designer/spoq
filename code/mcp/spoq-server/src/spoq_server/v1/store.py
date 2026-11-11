@@ -238,7 +238,12 @@ class Store:
     def snapshot(self):
         with transaction(self.path) as db:
             tables = ('nodes', 'edges', 'events', 'journal_entries', 'runs', 'agents', 'threads', 'messages', 'deliveries', 'claims', 'meta', 'legacy_sources')
+            from .workflows.schema import WORKFLOW_TABLES
+            has_workflows = db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='workflow_runs'").fetchone()
+            include_workflows = bool(has_workflows and any(db.execute(f'SELECT 1 FROM {table} LIMIT 1').fetchone() for table in WORKFLOW_TABLES))
+            if include_workflows:
+                tables += WORKFLOW_TABLES
             result = {t: [dict(r) for r in db.execute(f'SELECT * FROM {t}')] for t in tables}
             for row in result['legacy_sources']:
                 row['content'] = base64.b64encode(row['content']).decode('ascii')
-            return {'format': 'spoq-1', 'tables': result}
+            return {'format': 'spoq-1.1' if include_workflows else 'spoq-1', 'tables': result}

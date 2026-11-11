@@ -1,0 +1,28 @@
+{
+  "format": "spoq-ui-build-1",
+  "version": "1.1.0",
+  "files": {
+    "index.html": "16db825851640fad3027164e3bf0cb16aacf15420add1e36ec26dbc82c40eeca",
+    "package-lock.json": "bf91a722db21388c0c41f47cd2a1b5104cce438de9b79bea074ad4ea4f03e0ab",
+    "package.json": "a75a35a398fbe46fa4f776629d08182a3f16e8fc799551851a9f0c447c1cbd15",
+    "public/spoq.svg": "3d3cfe5c9947861181a134fc068baf2283cdec94fdecc6fd7f67dc327b8b537e",
+    "scripts/source-hash.mjs": "45e9160e745c2d4e94e1d36685f63b8bc8a46452a2c25ef6ac1d2399796d5a26",
+    "src/AccessibleRunList.tsx": "34860432bc5eac43b5711a46517118abadfc7aed40a87872ed2103fcf80b9f20",
+    "src/App.tsx": "c78a48aea8f3aba2ccd241dd59f1676c524bd6161871ea5276e94a9f319da3c0",
+    "src/ArtifactPanel.tsx": "1e34d3c41d8a898de750f383035e936e6d391b984523e41d8ffac9698174cc2d",
+    "src/PhaseDetails.tsx": "412d97ec04d5361487e22b21771c9fff361c8e0e7d857b97d7eaa4b4722c579f",
+    "src/RunHistory.tsx": "575738fefb6f0d4e0657d7cdb2f9b4fb24424b6f7e3c72296757f6b2ec6bbc78",
+    "src/Status.tsx": "e1cb5b491bb72ec96c59973f15e6efb8ae129f3a8f2dedf01c83caac1266e9df",
+    "src/StrategyGraph.tsx": "1650e355b499d03a5ed141a8fdeddb900a754ff8c4f29224b9e1f6c7888fa676",
+    "src/WorkGraph.tsx": "f631dbba47c7189c942bd47b28f586a3ea7a1545242a1759dfd7cdad21aea972",
+    "src/api.ts": "a51e207d9f4d070a8baa9f331fd2813761886e7988044adf0c8ac896d9d6192f",
+    "src/events.ts": "12ba7f067928d9af8abead99168e8643871e1a1cf7507ff5727986e9fe31d466",
+    "src/main.tsx": "2a2e9e444f29f5a9166b20294834a7f998a63727f69d8e0d4c59686067c4f0f1",
+    "src/styles.css": "a520ffe394bb6566c57af9e2493400ec5296c08f287694d5c197f7f8b62dbefe",
+    "src/types.ts": "a52c9b4a5f8b2dbc2fe1b644a39f8235c1e85313aa12e62fc06bca5881d3cb86",
+    "src/useHistoryPage.ts": "8c20a84866c9833ee7f3077760108011dc0bf270edd2d5dd68f45851aa047abc",
+    "tsconfig.json": "59c2f3a9dc654a10cda85a585097fce349afe3b1da052c4f1e5159ab5ab13f90",
+    "vite.config.ts": "ac90a769c9483eb67d14b06c9c741e8c27d81ca0484184185151e2705a87a46a"
+  },
+  "source_sha256": "4c5d6f3702144cebe0aa33e1dea64db7b68320fa9645dae22418c50fdbfc6e9b"
+}

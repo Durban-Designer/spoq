@@ -89,3 +89,21 @@ Append progress/completion journals with scope, counters, results, decisions,
 limitations, and confidence. Return completed IDs, gate/evidence IDs, remaining
 work, and blockers to root SPOQ or the direct caller. Follow repository rules for
 commits, deployment, and publication; stage execution adds no new authorization.
+
+## Strategy invocation
+
+When dispatched by a saved strategy, read `../spoq/references/workflows.md` and
+retain the supplied run/scope/phase/attempt IDs, input hashes and phase lease.
+Do not create another run or recursively dispatch the root flow. Direct invocation
+without a workflow envelope keeps this stage independently usable.
+
+Reuse the workflow run identity and register workers in it; the phase lease does
+not replace Task claims or their durable retry budgets. Renew both leases during
+long work. Fetch referenced criteria/artifacts and paginate work when necessary.
+Before reusing completed work or old checks, compare actual code/test file hashes
+with the reviewed_files manifest and matching validation journals. Changed files
+need affected validation; no unchanged review is repeated merely for handoff.
+Return an implementation JSON artifact linking the actual scope/specification,
+reviewed_files path-to-SHA256 mapping, validation_journal_ids and observed check
+references. Use the payload helper when helpful. Server acceptance records the
+client's observations; it does not independently execute or authenticate them.

@@ -32,6 +32,7 @@ templates resolve correctly.
 from __future__ import annotations
 
 import json
+import hashlib
 import re
 import shutil
 from collections.abc import Callable
@@ -306,10 +307,10 @@ def _render_md_command(description: str, body: str) -> str:
     return f"> {description}\n\n{body.rstrip()}\n"
 
 
-def _render_skill(name: str, description: str, body: str) -> str:
+def _render_skill(name: str, description: str, body: str, metadata: dict | None = None) -> str:
     """Render a Codex-compatible ``SKILL.md`` file."""
     frontmatter = yaml.safe_dump(
-        {"name": name, "description": description},
+        {**(metadata or {}), "name": name, "description": description},
         sort_keys=False,
         allow_unicode=False,
     ).strip()
@@ -328,31 +329,92 @@ def _copy_tree(
     src: Path,
     dst: Path,
     rewrite: Callable[[str], str] | None = None,
+    backup_root: Path | None = None,
+    workspace_root: Path | None = None,
 ) -> None:
-    """Replace ``dst`` with a copy of ``src``, skipping bytecode."""
-    if dst.exists():
-        shutil.rmtree(dst)
-    shutil.copytree(
-        src, dst, ignore=shutil.ignore_patterns("__pycache__", "*.pyc")
-    )
-    if rewrite is None:
-        return
-
-    for path in dst.rglob("*"):
-        if not path.is_file():
+    """Refresh bundled files in place; custom siblings remain user-owned."""
+    for source in src.rglob('*'):
+        relative = source.relative_to(src)
+        if not source.is_file() or '__pycache__' in relative.parts or source.suffix == '.pyc':
             continue
-        try:
-            original = path.read_text(encoding="utf-8")
-        except UnicodeDecodeError:
+        content = source.read_bytes()
+        if rewrite is not None:
+            try:
+                content = rewrite(content.decode('utf-8')).encode('utf-8')
+            except UnicodeDecodeError:
+                pass
+        _write_managed(dst / relative, content, backup_root / relative if backup_root else None, workspace_root)
+
+
+def _local_managed_path(path: Path, workspace_root: Path | None) -> None:
+    if workspace_root is not None and not path.resolve().is_relative_to(workspace_root):
+        raise ValueError(f'Managed skill destination or backup escapes the target workspace: {path}')
+
+
+def _archive_managed(path: Path, original: bytes, workspace_root: Path | None = None) -> None:
+    """Retain each distinct replaced version once, with a stable first backup."""
+    _local_managed_path(path, workspace_root)
+    if path.exists():
+        if path.read_bytes() == original:
+            return
+        path = path.with_name(path.name + '.' + hashlib.sha256(original).hexdigest())
+        _local_managed_path(path, workspace_root)
+        if path.exists():
+            if path.read_bytes() != original:
+                raise ValueError('Managed skill backup conflicts with its content hash')
+            return
+    path.parent.mkdir(parents=True, exist_ok=True)
+    _local_managed_path(path, workspace_root)
+    path.write_bytes(original)
+
+
+def _write_managed(path: Path, content: bytes, backup: Path | None,
+                   workspace_root: Path | None = None) -> None:
+    _local_managed_path(path, workspace_root)
+    if backup is not None:
+        _local_managed_path(backup, workspace_root)
+    if path.is_symlink():
+        raise ValueError(f'Refusing to replace a managed skill file symlink: {path}')
+    if path.is_file():
+        original = path.read_bytes()
+        if original == content:
+            return
+        if backup is not None:
+            _archive_managed(backup, original, workspace_root)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(content)
+
+
+def _merge_metadata(before: dict, managed: dict) -> dict:
+    """Refresh known fields while retaining unrelated metadata and dependencies."""
+    result = dict(before)
+    for key, value in managed.items():
+        previous = result.get(key)
+        if key == 'policy' and key in before:
             continue
-        updated = rewrite(original)
-        if updated != original:
-            path.write_text(updated, encoding="utf-8")
+        if isinstance(previous, dict) and isinstance(value, dict):
+            result[key] = _merge_metadata(previous, value)
+        elif key == 'tools' and isinstance(previous, list) and isinstance(value, list):
+            # Dependency identity is type/value; keep user-only tools and fields.
+            tools = list(previous)
+            for tool in value:
+                identity = (tool.get('type'), tool.get('value')) if isinstance(tool, dict) else None
+                index = next((i for i, item in enumerate(tools) if identity is not None
+                              and isinstance(item, dict) and (item.get('type'), item.get('value')) == identity), None)
+                if index is None:
+                    if tool not in tools:
+                        tools.append(tool)
+                else:
+                    tools[index] = _merge_metadata(tools[index], tool)
+            result[key] = tools
+        else:
+            result[key] = value
+    return result
 
 
-def _merge_skill_metadata(src: Path, dst: Path, backup_root: Path) -> None:
+def _merge_skill_metadata(src: Path, dst: Path, backup_root: Path,
+                          workspace_root: Path | None = None) -> None:
     """Refresh managed UI files without deleting custom agents or invocation policy."""
-    from uuid import uuid4
     for source in src.rglob('*'):
         if not source.is_file():
             continue
@@ -371,23 +433,15 @@ def _merge_skill_metadata(src: Path, dst: Path, backup_root: Path) -> None:
                     raise ValueError(f'Invalid skill UI metadata: {target}') from exc
                 if not isinstance(before,dict) or not isinstance(managed,dict):
                     raise ValueError(f'Skill UI metadata must be a mapping: {target}')
-                merged={**before,**managed}
-                if 'policy' in before:
-                    merged['policy']=before['policy']
+                merged=_merge_metadata(before,managed)
                 if 'interface' in managed:
                     if not isinstance(before.get('interface') or {},dict) or not isinstance(managed['interface'],dict):
                         raise ValueError(f'Skill UI interface must be a mapping: {target}')
-                    merged['interface']={**(before.get('interface') or {}),**managed['interface']}
+                    merged['interface']=_merge_metadata(before.get('interface') or {},managed['interface'])
                 if merged==before:
                     continue
                 content=yaml.safe_dump(merged,sort_keys=False).encode()
-            backup=backup_root/relative
-            backup.parent.mkdir(parents=True,exist_ok=True)
-            if backup.exists():
-                backup=backup.with_name(backup.name+'-'+str(uuid4()))
-            shutil.copy2(target,backup)
-        target.parent.mkdir(parents=True,exist_ok=True)
-        target.write_bytes(content)
+        _write_managed(target,content,backup_root/relative,workspace_root)
 
 
 def install_commands(
@@ -404,10 +458,43 @@ def install_commands(
 
     Returns the number of commands written (the shared library does not count).
     """
+    target = Path(target).resolve()  # An explicitly selected symlink root is valid.
     root = target / spec.commands_root
-    root.mkdir(parents=True, exist_ok=True)
     resource_prefix = spec.commands_root.rstrip("/") + "/"
     installed = 0
+    backup_root = target / '.spoq/legacy-managed-skills' / spec.key
+    # Check the entire installation before creating directories or refreshing a
+    # single file. Both managed targets and old-content archives may have escaped
+    # through a pre-existing parent-directory symlink.
+    writes = []
+    for name in skill_names:
+        source = bundled_skills_dir / name
+        if not source.is_dir():
+            continue
+        if name == _LIB_SKILL:
+            trees = [(source, root/name, backup_root/name)]
+        elif (source/'SKILL.md').is_file():
+            destination = (root/(name+'.toml') if spec.command_kind == TOML else
+                           root/(name+'.md') if spec.command_kind == MD else root/name/'SKILL.md')
+            archive = backup_root/name/'SKILL.md' if spec.command_kind == SKILL else backup_root/destination.name
+            writes.append((destination, archive))
+            trees = [(source/sub, root/name/sub, backup_root/name/sub)
+                     for sub in _RESOURCE_SUBDIRS if (source/sub).is_dir()]
+            if spec.command_kind == SKILL and (source/'agents').is_dir():
+                trees.append((source/'agents', root/name/'agents', target/'.spoq/legacy-skill-metadata'/spec.key/name/'agents'))
+        else:
+            continue
+        for tree, destination, archive in trees:
+            for file in tree.rglob('*'):
+                relative = file.relative_to(tree)
+                if file.is_file() and '__pycache__' not in relative.parts and file.suffix != '.pyc':
+                    writes.append((destination/relative, archive/relative))
+    for destination, archive in [(root, backup_root), *writes]:
+        _local_managed_path(destination, target)
+        _local_managed_path(archive, target)
+        if destination.is_file():
+            _local_managed_path(archive.with_name(archive.name+'.'+hashlib.sha256(destination.read_bytes()).hexdigest()),target)
+    root.mkdir(parents=True, exist_ok=True)
 
     for name in skill_names:
         src = bundled_skills_dir / name
@@ -420,6 +507,8 @@ def install_commands(
                 src,
                 root / _LIB_SKILL,
                 rewrite=lambda text, s=spec: _rewrite_ported_text(s, text),
+                backup_root=backup_root/_LIB_SKILL,
+                workspace_root=target,
             )
             continue
 
@@ -448,25 +537,28 @@ def install_commands(
                     sub_src,
                     root / name / sub,
                     rewrite=lambda text, s=spec: _rewrite_ported_text(s, text),
+                    backup_root=backup_root/name/sub,
+                    workspace_root=target,
                 )
 
         if spec.command_kind == TOML:
-            (root / f"{name}.toml").write_text(
-                _render_toml_command(description, body), encoding="utf-8"
-            )
+            _write_managed(root/f'{name}.toml',_render_toml_command(description,body).encode(),backup_root/f'{name}.toml',target)
         elif spec.command_kind == MD:
-            (root / f"{name}.md").write_text(
-                _render_md_command(description, body), encoding="utf-8"
-            )
+            _write_managed(root/f'{name}.md',_render_md_command(description,body).encode(),backup_root/f'{name}.md',target)
         else:  # SKILL
             skill_dir = root / name
             skill_dir.mkdir(parents=True, exist_ok=True)
-            (skill_dir / "SKILL.md").write_text(
-                _render_skill(command_name, description, body), encoding="utf-8"
-            )
+            destination = skill_dir/'SKILL.md'
+            metadata = meta
+            if destination.is_file():
+                previous, _ = _split_frontmatter(destination.read_text(encoding='utf-8'))
+                metadata = _merge_metadata(previous, meta)
+                if 'allowed-tools' in previous:
+                    metadata['allowed-tools'] = previous['allowed-tools']
+            _write_managed(destination,_render_skill(command_name,description,body,metadata).encode(),backup_root/name/'SKILL.md',target)
             if (src / 'agents').is_dir():
                 _merge_skill_metadata(src/'agents',skill_dir/'agents',
-                                     target/'.spoq/legacy-skill-metadata'/spec.key/name/'agents')
+                                     target/'.spoq/legacy-skill-metadata'/spec.key/name/'agents',target)
         installed += 1
 
     return installed

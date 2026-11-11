@@ -20,10 +20,12 @@ def test_no_private_backend_or_bulk_import_shipped():
 
 
 def test_no_local_state_or_deployment_inputs_in_source():
-    tracked = subprocess.check_output(['git', '-C', str(ROOT), 'ls-files', '-z']).decode().split('\0')
+    tracked = subprocess.check_output(['git', '-C', str(ROOT), 'ls-files', '--cached', '--others', '--exclude-standard', '-z']).decode().split('\0')
     for name in ['.aws', '.spoq', '.env', '.pypirc', 'infrastructure', 'spoq', 'session-transcripts']:
         assert not any(path == name or path.startswith(name + '/') for path in tracked), name
     assert not any(path.startswith('code/spoq-website/') for path in tracked)
+    apps = [path for path in tracked if path.startswith('code/apps/')]
+    assert apps and all(path.startswith('code/apps/spoq-ui/') for path in apps)
     for path in (PACKAGE / 'src').rglob('*'):
         assert path.suffix not in {'.db', '.sqlite', '.pem', '.key'}, path
         assert not path.is_symlink(), path

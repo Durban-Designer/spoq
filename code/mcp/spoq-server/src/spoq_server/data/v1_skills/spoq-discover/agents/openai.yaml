@@ -1,0 +1,4 @@
+interface:
+  display_name: "/spoq-discover"
+  short_description: "Record constraints and decisions before planning"
+  default_prompt: "Use $spoq-discover to investigate my goal and record the decisions needed before decomposition."

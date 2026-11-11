@@ -1,0 +1,20 @@
+{
+  "format": "spoq-routing-contract-cases-1",
+  "cases": [
+    {"name":"small-clear","inputs":{"effort":"small","uncertainty":"low","impact":"low","coupling":"low"},"strategy":"classic","profile":"compact"},
+    {"name":"large-clear","inputs":{"effort":"large","uncertainty":"low","impact":"low","coupling":"low"},"strategy":"classic","profile":"standard"},
+    {"name":"small-uncertain","inputs":{"effort":"small","uncertainty":"high","impact":"low","coupling":"low"},"strategy":"piqard","profile":"standard"},
+    {"name":"large-uncertain","inputs":{"effort":"large","uncertainty":"high","impact":"low","coupling":"low"},"strategy":"piqard","profile":"standard"},
+    {"name":"critical-impact","inputs":{"effort":"small","uncertainty":"low","impact":"critical","coupling":"low"},"strategy":"piqard","profile":"standard"},
+    {"name":"coupled","inputs":{"effort":"medium","uncertainty":"low","impact":"low","coupling":"high"},"strategy":"piqard","profile":"standard"},
+    {"name":"unknown","inputs":{},"strategy":"piqard","profile":"standard"},
+    {"name":"erd-requested","inputs":{"effort":"small","uncertainty":"low","impact":"low","coupling":"low","addons":{"erd":true}},"strategy":"piqard","profile":"standard"},
+    {"name":"proof-required","inputs":{"uncertainty":"low","formal_proof_required":true},"strategy":"piqard","profile":"standard"},
+    {"name":"explicit-human-involvement","inputs":{"effort":"small","uncertainty":"low","impact":"low","coupling":"low"},"preference":"piqard","strategy":"piqard","profile":"standard"},
+    {"name":"explicit-classic","inputs":{"uncertainty":"high"},"preference":"classic","strategy":"classic","profile":"standard"}
+  ],
+  "generated_axes": {"effort":["small","medium","large","unknown"],"uncertainty":["low","medium","high","unknown"],"impact":["low","medium","high","critical","unknown"],"coupling":["low","medium","high","unknown"]},
+  "addons":["diagram","erd","algorithm","formal"],
+  "expected_generated_cases":5120,
+  "provenance":"Contract fixtures and scripted control tests, not model inference or human approvals. Failed assertions include reproducible routing inputs."
+}

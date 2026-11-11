@@ -47,7 +47,8 @@ def main():
         "init", help="Bootstrap SPOQ in a project directory"
     )
     init_parser.add_argument(
-        "--target", default=".", help="Target directory (default: current directory)"
+        "--target", "--root", dest="target", default=".",
+        help="Project directory (default: current directory; --root is an alias)"
     )
     init_parser.add_argument(
         "--full", action="store_true",

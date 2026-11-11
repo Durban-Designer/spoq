@@ -28,5 +28,30 @@ describes the SQLite rewrite without attributing old study results to it.
 
 Automated boundary tests and a credential scan provide useful evidence, but
 they cannot establish ownership or publication rights for every sentence.
-Repository visibility is intentionally private for the owner's review.
+The owner authorized the reviewed 1.1 refresh and public promotion on 2026-11-11.
+Visibility is changed separately by the release operator after exact-source review
+and CI; this note is not a claim that the promotion has already occurred.
 This extraction does not change the existing published PyPI artifact.
+
+
+## 1.1 source refresh
+
+The original exclusions remain in force. New selected inputs are the generic
+strategy engine, bundled Classic/PIQARD definitions, discovery/design skills,
+local read-only viewer, contributor viewer source and build guard, and synthetic
+unit/process/browser tests. The contributor app under `code/apps/spoq-ui` is the
+local MCP viewer; the commercial marketing website and cloud infrastructure
+remain excluded. No other application tree was imported.
+
+The curated 1.0 config/CLI removals and synthetic fixture adaptations were retained.
+Source version is now 1.1.0. Compiling this checkout produces a curated edition
+that differs from the immutable PyPI1.1.0 wheel, including removal of commercial
+HTTP/import integration. No PyPI artifact is replaced or uploaded by this update.
+Repository URLs point to this GitHub project; older published metadata remains
+part of those immutable artifacts.
+
+The paper's existing research text, author identities, affiliations, citation
+metadata, aggregate observations and named adopter/acknowledgments are preserved.
+The owner requested public promotion after the private review period. Automated
+boundary and secret scans supplement that authorization; they do not establish
+ownership rights or independently prove every research claim.

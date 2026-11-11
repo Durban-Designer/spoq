@@ -56,3 +56,18 @@ with file:line or node references. Include an action for every blocker; group re
 findings rather than hide them to meet the limit. Do not soften a failed build or
 unmet requirement into a passing review. Rerun affected checks after changes;
 unchanged evidence may be reused only when still applicable.
+
+## Strategy invocation
+
+When dispatched by a saved strategy, read `../spoq/references/workflows.md` and
+retain the supplied run/scope/phase/attempt IDs, input hashes and phase lease.
+Do not create another run or recursively dispatch the root flow. Direct invocation
+without a workflow envelope keeps this stage independently usable.
+
+Record actual reviewed code/test SHA-256 and linked validation journal IDs. Before
+reusing a previous check/gate, compare those files and the saved specification to
+the reviewed state; rerun affected checks when either changed. Preserve original
+reviewer identity/type, command provenance and limitations for reused results.
+For a workflow gate, submit this evidence plus all ten scores with the invocation
+identities and input hashes; its output is computed by the engine. Do not supply
+a replacement gate artifact or run duplicate QA on unchanged covered artifacts.

@@ -35,7 +35,10 @@ def check_version() -> VersionCheckResult:
         req = urllib.request.Request(VERSION_URL, method="GET")
         with urllib.request.urlopen(req, timeout=TIMEOUT_SECONDS) as resp:
             data = json.loads(resp.read().decode("utf-8"))
-            remote = data.get("version", "")
+            # New feeds distinguish source candidates from verified PyPI
+            # releases. An explicit unknown publication must not fall back to
+            # a candidate. Retain compatibility with older single-value feeds.
+            remote = (data.get("publishedVersion") or "") if "publishedVersion" in data else data.get("version", "")
             is_outdated = remote != "" and Version(remote) > Version(__version__)
             return VersionCheckResult(
                 is_outdated=is_outdated,

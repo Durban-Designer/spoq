@@ -1,0 +1,12 @@
+{
+  "files": {
+    "assets/index-COq2Fdt-.js": "73bcd3f6cfd5711ade78a7411872e79abb4f1576e5f48b759f7b66dbd706f423",
+    "assets/index-D2Ohpd2r.css": "aeef8b49e32810156767ba58239dbc8271c81c5cf451fe61ec10c3b8662d0eb3",
+    "build-info.json": "fe6b3381120df713f1c66e7db6f03c832c6882349d3b267e8825879ad097162d",
+    "index.html": "b8ebb86f25c778445d1b20e8b768afc90c58a34aede37d7317b16935b532f24d",
+    "licenses.txt": "9def57546145ed33d7c93e8fe4ef353b1fcd8e6a0daf3d0e4d160104bc43a6f6",
+    "spoq.svg": "3d3cfe5c9947861181a134fc068baf2283cdec94fdecc6fd7f67dc327b8b537e"
+  },
+  "format": "spoq-ui-assets-1",
+  "version": "1.1.0"
+}

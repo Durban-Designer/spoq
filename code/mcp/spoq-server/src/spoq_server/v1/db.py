@@ -9,7 +9,7 @@ from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 SCHEMA = """
 CREATE TABLE meta(key TEXT PRIMARY KEY, value TEXT NOT NULL);
@@ -75,6 +75,13 @@ CREATE TABLE embedding_chunks(space_id TEXT NOT NULL REFERENCES embedding_spaces
  row_id INTEGER NOT NULL, document_id INTEGER NOT NULL REFERENCES search_documents(id),
  content_hash TEXT NOT NULL, chunk_text TEXT NOT NULL, PRIMARY KEY(space_id,row_id));
 """
+
+
+# Preserve schema-1 SQL for upgrade fixtures; existing databases are never
+# upgraded by initialize(). Only a fresh database receives the current schema.
+BASE_SCHEMA = SCHEMA
+from .workflows.schema import WORKFLOW_SCHEMA
+SCHEMA += WORKFLOW_SCHEMA
 
 
 def now() -> str:

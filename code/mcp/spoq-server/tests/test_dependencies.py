@@ -18,8 +18,11 @@ def test_mcp_dependency_supports_v1_and_excludes_v2():
         for value in manifest["project"]["dependencies"]
         if Requirement(value).name == "mcp"
     )
-    assert "1.26.0" in requirement.specifier
-    assert "1.28.1" in requirement.specifier
+    # SDK security advisories through GHSA-rwrf-2pqf-9j8j were fixed in 1.30.
+    assert "1.30.0" in requirement.specifier
+    assert "1.31.0" in requirement.specifier
+    for affected in ("1.26.0", "1.28.1", "1.29.1"):
+        assert affected not in requirement.specifier
     assert "2.0.0" not in requirement.specifier
     assert "2.1.0" not in requirement.specifier
     assert "1.0.0" not in requirement.specifier
@@ -43,6 +46,39 @@ def test_lockfile_preserves_mcp_compatibility_boundary():
     assert Requirement("mcp" + locked_requirement["specifier"]) == requirement
     sdk = next(item for item in lock["package"] if item["name"] == "mcp")
     assert sdk["version"] in requirement.specifier
+
+
+def test_pyyaml_floor_excludes_the_unbuildable_python312_release():
+    """6.0 has no cp312 wheel and its isolated sdist fails cython_sources."""
+    manifest = tomllib.loads((PACKAGE_ROOT / 'pyproject.toml').read_text())
+    requirement = next(Requirement(value) for value in manifest['project']['dependencies']
+                       if Requirement(value).name == 'pyyaml')
+    assert '6.0' not in requirement.specifier
+    assert '6.0.1' in requirement.specifier
+    assert '6.0.3' in requirement.specifier
+    lock = tomllib.loads((PACKAGE_ROOT / 'uv.lock').read_text())
+    package = next(item for item in lock['package'] if item['name'] == 'spoq')
+    declared = next(item for item in package['metadata']['requires-dist'] if item['name'] == 'pyyaml')
+    assert Requirement('pyyaml' + declared['specifier']) == requirement
+
+
+def test_search_extra_cannot_select_the_affected_image_dependency_chain():
+    """FastEmbed 0.9.0 caps Pillow below its 13.0 security fixes."""
+    manifest = tomllib.loads((PACKAGE_ROOT / 'pyproject.toml').read_text())
+    search = {r.name: r for r in map(Requirement, manifest['project']['optional-dependencies']['search'])}
+    assert '0.9.0' not in search['fastembed'].specifier
+    assert '0.9.1' in search['fastembed'].specifier
+    assert '12.3.0' not in search['pillow'].specifier
+    assert '13.0.0' in search['pillow'].specifier
+
+
+def test_development_runner_excludes_the_affected_temporary_directory_versions():
+    manifest = tomllib.loads((PACKAGE_ROOT / 'pyproject.toml').read_text())
+    requirement = next(Requirement(value) for value in manifest['dependency-groups']['dev']
+                       if Requirement(value).name == 'pytest')
+    assert '8.0.0' not in requirement.specifier
+    assert '9.0.2' not in requirement.specifier
+    assert '9.0.3' in requirement.specifier
 
 
 @pytest.mark.anyio

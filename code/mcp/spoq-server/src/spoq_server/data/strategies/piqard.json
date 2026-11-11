@@ -1,0 +1,308 @@
+{
+  "schema_version": 1,
+  "id": "piqard",
+  "version": "1.1.0",
+  "title": "PIQARD — plan it quickly, AI records decisions",
+  "entry": "discover",
+  "max_transitions": 64,
+  "phases": [
+    {
+      "id": "discover",
+      "kind": "skill",
+      "skill": "spoq-discover",
+      "inputs": [
+        "goal"
+      ],
+      "outputs": [
+        "discovery"
+      ],
+      "max_attempts": 3,
+      "config": {}
+    },
+    {
+      "id": "diagram",
+      "kind": "design",
+      "skill": "spoq-design",
+      "inputs": [
+        "discovery"
+      ],
+      "outputs": [
+        "diagram"
+      ],
+      "max_attempts": 3,
+      "config": {
+        "provider": "diagram"
+      }
+    },
+    {
+      "id": "erd",
+      "kind": "design",
+      "skill": "spoq-design",
+      "inputs": [
+        "discovery"
+      ],
+      "outputs": [
+        "erd"
+      ],
+      "max_attempts": 3,
+      "config": {
+        "provider": "erd"
+      }
+    },
+    {
+      "id": "algorithm",
+      "kind": "design",
+      "skill": "spoq-design",
+      "inputs": [
+        "discovery"
+      ],
+      "outputs": [
+        "algorithm"
+      ],
+      "max_attempts": 3,
+      "config": {
+        "provider": "algorithm"
+      }
+    },
+    {
+      "id": "formal",
+      "kind": "design",
+      "skill": "spoq-design",
+      "inputs": [
+        "discovery"
+      ],
+      "outputs": [
+        "formal"
+      ],
+      "max_attempts": 3,
+      "config": {
+        "provider": "formal",
+        "capability": "formal_proof",
+        "capability_required_input": "formal_proof_required"
+      }
+    },
+    {
+      "id": "design-join",
+      "kind": "join",
+      "skill": null,
+      "inputs": [],
+      "outputs": [],
+      "max_attempts": 3,
+      "config": {
+        "join": "selected"
+      }
+    },
+    {
+      "id": "narrative",
+      "kind": "design",
+      "skill": "spoq-design",
+      "inputs": [
+        "discovery"
+      ],
+      "outputs": [
+        "narrative_plan"
+      ],
+      "max_attempts": 3,
+      "config": {
+        "provider": "narrative_plan",
+        "optional_inputs": [
+          "diagram",
+          "erd",
+          "algorithm",
+          "formal"
+        ]
+      }
+    },
+    {
+      "id": "review",
+      "kind": "human",
+      "skill": null,
+      "inputs": [
+        "narrative_plan"
+      ],
+      "outputs": [
+        "decision"
+      ],
+      "max_attempts": 3,
+      "config": {
+        "artifact_kind": "narrative_plan",
+        "response_origin": "user"
+      }
+    },
+    {
+      "id": "plan",
+      "kind": "skill",
+      "skill": "spoq-plan",
+      "inputs": [
+        "goal",
+        "narrative_plan",
+        "decision"
+      ],
+      "outputs": [
+        "project_plan"
+      ],
+      "max_attempts": 3,
+      "config": {
+        "planning_only": true
+      }
+    },
+    {
+      "id": "plan-validation",
+      "kind": "gate",
+      "skill": "spoq-plan-validation",
+      "inputs": [
+        "project_plan"
+      ],
+      "outputs": [
+        "plan_gate"
+      ],
+      "max_attempts": 3,
+      "config": {
+        "stage": "plan",
+        "minimum_average": 95,
+        "minimum_metric": 90,
+        "required_checks": true
+      }
+    },
+    {
+      "id": "execute",
+      "kind": "skill",
+      "skill": "spoq-execution",
+      "inputs": [
+        "project_plan",
+        "plan_gate"
+      ],
+      "outputs": [
+        "implementation"
+      ],
+      "max_attempts": 3,
+      "config": {}
+    },
+    {
+      "id": "implementation-validation",
+      "kind": "gate",
+      "skill": "spoq-validation",
+      "inputs": [
+        "implementation"
+      ],
+      "outputs": [
+        "implementation_gate"
+      ],
+      "max_attempts": 3,
+      "config": {
+        "stage": "implementation",
+        "minimum_average": 95,
+        "minimum_metric": 80,
+        "required_checks": true
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source": "discover",
+      "target": "diagram",
+      "on": "pass",
+      "when": {
+        "key": "addons.diagram",
+        "op": "truthy"
+      }
+    },
+    {
+      "source": "discover",
+      "target": "erd",
+      "on": "pass",
+      "when": {
+        "key": "addons.erd",
+        "op": "truthy"
+      }
+    },
+    {
+      "source": "discover",
+      "target": "algorithm",
+      "on": "pass",
+      "when": {
+        "key": "addons.algorithm",
+        "op": "truthy"
+      }
+    },
+    {
+      "source": "discover",
+      "target": "formal",
+      "on": "pass",
+      "when": {
+        "key": "addons.formal",
+        "op": "truthy"
+      }
+    },
+    {
+      "source": "discover",
+      "target": "design-join",
+      "on": "pass"
+    },
+    {
+      "source": "diagram",
+      "target": "design-join",
+      "on": "pass"
+    },
+    {
+      "source": "erd",
+      "target": "design-join",
+      "on": "pass"
+    },
+    {
+      "source": "algorithm",
+      "target": "design-join",
+      "on": "pass"
+    },
+    {
+      "source": "formal",
+      "target": "design-join",
+      "on": "pass"
+    },
+    {
+      "source": "design-join",
+      "target": "narrative",
+      "on": "pass"
+    },
+    {
+      "source": "narrative",
+      "target": "review",
+      "on": "pass"
+    },
+    {
+      "source": "review",
+      "target": "plan",
+      "on": "pass"
+    },
+    {
+      "source": "review",
+      "target": "narrative",
+      "on": "fail"
+    },
+    {
+      "source": "plan",
+      "target": "plan-validation",
+      "on": "pass"
+    },
+    {
+      "source": "plan-validation",
+      "target": "execute",
+      "on": "pass"
+    },
+    {
+      "source": "execute",
+      "target": "implementation-validation",
+      "on": "pass"
+    },
+    {
+      "source": "plan-validation",
+      "target": "plan",
+      "on": "fail"
+    },
+    {
+      "source": "implementation-validation",
+      "target": "execute",
+      "on": "fail"
+    }
+  ]
+}

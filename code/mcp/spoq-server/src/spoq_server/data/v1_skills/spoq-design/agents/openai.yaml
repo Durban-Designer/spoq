@@ -1,0 +1,4 @@
+interface:
+  display_name: "/spoq-design"
+  short_description: "Create reviewable SPOQ planning and design artifacts"
+  default_prompt: "Use $spoq-design to produce the design artifacts requested by my saved SPOQ strategy."

@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "id": "classic",
+  "version": "1.1.0",
+  "title": "Classic SPOQ",
+  "entry": "plan",
+  "max_transitions": 24,
+  "phases": [
+    {
+      "id": "plan",
+      "kind": "skill",
+      "skill": "spoq-plan",
+      "inputs": [
+        "goal"
+      ],
+      "outputs": [
+        "project_plan"
+      ],
+      "max_attempts": 3,
+      "config": {
+        "planning_only": true
+      }
+    },
+    {
+      "id": "plan-validation",
+      "kind": "gate",
+      "skill": "spoq-plan-validation",
+      "inputs": [
+        "project_plan"
+      ],
+      "outputs": [
+        "plan_gate"
+      ],
+      "max_attempts": 3,
+      "config": {
+        "stage": "plan",
+        "minimum_average": 95,
+        "minimum_metric": 90,
+        "required_checks": true
+      }
+    },
+    {
+      "id": "execute",
+      "kind": "skill",
+      "skill": "spoq-execution",
+      "inputs": [
+        "project_plan",
+        "plan_gate"
+      ],
+      "outputs": [
+        "implementation"
+      ],
+      "max_attempts": 3,
+      "config": {}
+    },
+    {
+      "id": "implementation-validation",
+      "kind": "gate",
+      "skill": "spoq-validation",
+      "inputs": [
+        "implementation"
+      ],
+      "outputs": [
+        "implementation_gate"
+      ],
+      "max_attempts": 3,
+      "config": {
+        "stage": "implementation",
+        "minimum_average": 95,
+        "minimum_metric": 80,
+        "required_checks": true
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source": "plan",
+      "target": "plan-validation",
+      "on": "pass"
+    },
+    {
+      "source": "plan-validation",
+      "target": "execute",
+      "on": "pass"
+    },
+    {
+      "source": "execute",
+      "target": "implementation-validation",
+      "on": "pass"
+    },
+    {
+      "source": "plan-validation",
+      "target": "plan",
+      "on": "fail"
+    },
+    {
+      "source": "implementation-validation",
+      "target": "execute",
+      "on": "fail"
+    }
+  ]
+}

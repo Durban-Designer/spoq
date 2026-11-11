@@ -10,6 +10,12 @@ from spoq_server import __version__
 from .db import uid
 
 
+class CodexRPCError(RuntimeError):
+    def __init__(self, error):
+        self.error = error
+        super().__init__(json.dumps(error))
+
+
 def notification(delivery):
     return (f"SPOQ notification {delivery['message_id']} for agent {delivery['recipient']} "
             f"in run {delivery['run_id']}. Read spoq_read_inbox, process this message, then "
@@ -41,14 +47,27 @@ async def app_server(delivery):
                 response = json.loads(await asyncio.wait_for(socket.recv(), 20))
                 if response.get('id') == request_id:
                     if 'error' in response:
-                        raise RuntimeError(json.dumps(response['error']))
+                        raise CodexRPCError(response['error'])
                     return response.get('result', {})
                 # Reject server requests we cannot service rather than hanging approvals.
                 if 'method' in response and 'id' in response:
                     await socket.send(json.dumps({'id': response['id'], 'error': {'code': -32601, 'message': 'Unsupported client request'}}))
         await request('initialize', {'clientInfo': {'name': 'spoq', 'version': __version__}})
         await socket.send(json.dumps({'method': 'initialized', 'params': {}}))
-        loaded = await request('thread/resume', {'threadId': delivery['target']})
+        try:
+            loaded = await request('thread/resume', {'threadId': delivery['target']})
+        except CodexRPCError as exc:
+            error = exc.error
+            if (not isinstance(error, dict) or type(error.get('code')) is not int
+                    or error['code'] != -32601
+                    or error.get('message') != 'list_turns is not supported yet'):
+                raise
+            # Some paginated 0.167 threads cannot expose their first active
+            # turn history. No notification input has been submitted yet.
+            # Queue through the same endpoint; never guess a turn ID or replay
+            # a possibly accepted turn/start or turn/steer request.
+            await asyncio.to_thread(queue_cli, delivery)
+            return {'delivery_mode': 'queued_fallback'}
         thread = loaded.get('thread', {})
         turns = thread.get('turns', [])
         active = next((t for t in reversed(turns) if t.get('status') == 'inProgress'), None)
@@ -56,8 +75,10 @@ async def app_server(delivery):
         if active:
             params['expectedTurnId'] = active['id']
             await request('turn/steer', params)
+            return {'delivery_mode': 'steered'}
         else:
             await request('turn/start', params)
+            return {'delivery_mode': 'started'}
 
 
 def dispatch_once(board, *, sender=None):
@@ -65,16 +86,18 @@ def dispatch_once(board, *, sender=None):
     if delivery is None:
         return {'delivered': False}
     try:
+        delivery_result = {}
         from .board import validate_registration
         validate_registration(delivery['recipient'], 'delivery', delivery['runtime'], delivery['target'], delivery['endpoint'])
         if sender:
             sender(delivery)
         elif delivery['runtime'] == 'codex-cli':
             queue_cli(delivery)
+            delivery_result = {'delivery_mode': 'queued'}
         else:
-            asyncio.run(app_server(delivery))
+            delivery_result = asyncio.run(app_server(delivery)) or {}
     except Exception as exc:
         board.finish_delivery(delivery, str(exc))
         return {'delivered': False, 'message_id': delivery['message_id'], 'error': str(exc)}
     board.finish_delivery(delivery)
-    return {'delivered': True, 'message_id': delivery['message_id'], 'state': 'submitted'}
+    return {'delivered': True, 'message_id': delivery['message_id'], 'state': 'submitted', **delivery_result}

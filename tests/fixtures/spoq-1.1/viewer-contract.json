@@ -1,0 +1,127 @@
+{
+  "format": "spoq-workflow-view-1",
+  "cursor": 42,
+  "run": {
+    "run_id": "demo",
+    "scope_id": "checkout",
+    "status": "waiting_human",
+    "revision": 4,
+    "provenance": "strategy",
+    "pagination": {
+      "artifacts": {
+        "has_more": false,
+        "cursor": null
+      },
+      "decisions": {
+        "has_more": false,
+        "cursor": null
+      }
+    }
+  },
+  "definition": {
+    "id": "piqard",
+    "version": "1.1.0",
+    "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "phases": [
+      {
+        "id": "narrative",
+        "kind": "design"
+      },
+      {
+        "id": "review",
+        "kind": "human"
+      }
+    ],
+    "edges": [
+      {
+        "source": "narrative",
+        "target": "review",
+        "on": "pass"
+      },
+      {
+        "source": "review",
+        "target": "narrative",
+        "on": "fail"
+      }
+    ]
+  },
+  "routing": {
+    "strategy": "piqard",
+    "profile": "standard",
+    "policy_version": "1",
+    "inputs": {
+      "uncertainty": "high"
+    },
+    "reasons": [
+      "Requirements need human decisions"
+    ],
+    "addons": {}
+  },
+  "phases": [
+    {
+      "id": "narrative",
+      "status": "passed",
+      "attempt_id": "attempt-first"
+    },
+    {
+      "id": "review",
+      "status": "waiting_human",
+      "attempt_id": "attempt-second"
+    }
+  ],
+  "attempts": [
+    {
+      "id": "attempt-first",
+      "phase_id": "narrative",
+      "number": 1,
+      "status": "passed",
+      "owner": "worker",
+      "evidence": {
+        "review_type": "self_review"
+      }
+    },
+    {
+      "id": "attempt-second",
+      "phase_id": "review",
+      "number": 1,
+      "status": "waiting_human"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "artifact-plan",
+      "attempt_id": "attempt-first",
+      "kind": "narrative_plan",
+      "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "source": "markdown"
+    }
+  ],
+  "decisions": [],
+  "participants": [
+    {
+      "id": "worker",
+      "role": "worker"
+    }
+  ],
+  "work": {
+    "scope_id": "checkout",
+    "nodes": [
+      {
+        "id": "checkout",
+        "kind": "project_plan",
+        "title": "Checkout",
+        "status": "pending"
+      }
+    ],
+    "edges": [],
+    "pagination": {
+      "has_more": false,
+      "cursor": null
+    }
+  },
+  "blockers": [
+    "Awaiting a user response for artifact-plan at revision bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  ],
+  "has_more_attempts": false,
+  "attempt_cursor": null
+}

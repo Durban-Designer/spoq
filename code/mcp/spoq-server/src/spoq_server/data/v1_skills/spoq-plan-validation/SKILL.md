@@ -56,3 +56,16 @@ SPOQ may repair the plan and rerun this gate. A direct validation request report
 findings without silently expanding into planning or execution. Use an independent
 reviewer when repository policy requires it and delegation is available; identify
 self-review explicitly if it is the permitted fallback.
+
+## Strategy invocation
+
+When dispatched by a saved strategy, read `../spoq/references/workflows.md` and
+retain the supplied run/scope/phase/attempt IDs, input hashes and phase lease.
+Do not create another run or recursively dispatch the root flow. Direct invocation
+without a workflow envelope keeps this stage independently usable.
+
+A workflow gate submits the actual ten scores, observed checks and acceptance
+results with current invocation identities; the engine computes its gate artifact.
+Do not supply a replacement gate output. Reuse a current review only after
+matching the saved specification and reviewed artifacts, with original provenance;
+a new invocation alone is not a reason for duplicate unchanged QA.

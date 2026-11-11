@@ -11,14 +11,17 @@ from spoq_server import __version__
 from .board import Board
 from .codex import dispatch_once
 from .migration import get_store, migrate, status
+from .workflows.mcp import register_workflow_tools, capabilities as workflow_capabilities
 
 
 def create_server(root: Path):
     root = Path(root).resolve()
     mcp = FastMCP('spoq', instructions=(
-        'SPOQ 1.0 uses Project Plans → Features → Tasks in SQLite. Start with spoq_ping. '
+        'SPOQ uses Project Plans → Features → Tasks in SQLite. Start with spoq_ping. '
         'If migration_required is true, call spoq_migrate with confirmed=false, show its preview '
         'and conversion prompt to the user, then convert only after confirmation. '
+        'Use spoq_workflow_capabilities for Classic/PIQARD routing, bounded workflows, read-only graph/history and schema upgrade discovery. '
+        'Coding clients execute phase skills; progress uses polling or native relay and never requires universal MCP push. '
         'Old maps become Project Plans and old epics become Features. '
         'Read collaboration inboxes at execution checkpoints; acknowledge receipt separately from resolution.'))
 
@@ -34,7 +37,8 @@ def create_server(root: Path):
     def spoq_ping() -> dict:
         """Health, hierarchy, and first-use migration prompt after upgrading to SPOQ 1.0."""
         return {'status': 'ok', 'version': __version__, 'active_backend': 'sqlite',
-                'project_root': str(root), 'hierarchy': ['project_plan','feature','task'], **status(root)}
+                'project_root': str(root), 'hierarchy': ['project_plan','feature','task'], **status(root),
+                'workflow': workflow_capabilities(root)}
 
     @mcp.tool()
     def spoq_migrate(confirmed: bool = False) -> dict:
@@ -188,6 +192,7 @@ def create_server(root: Path):
         from .search import Embedder, reindex
         return reindex(store(), Embedder(cache_dir=root/'.spoq/models'))
 
+    register_workflow_tools(mcp, root)
     return mcp
 
 

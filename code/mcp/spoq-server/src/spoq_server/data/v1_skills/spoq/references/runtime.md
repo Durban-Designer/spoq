@@ -3,14 +3,14 @@
 Use the same workspace and SQLite store throughout a composed run. Read the
 repository's instructions and relevant journal before work. Try `spoq_ping` and
 verify its project root and SQLite backend. If MCP is absent, legacy, or rooted
-elsewhere, leave that connection alone and use SPOQ 1.0 CLI with
-`--root <workspace>` on every command. Check `spoq --version` and `spoq doctor`.
+elsewhere, leave that connection alone and use a strategy-capable SPOQ CLI with
+`--root <workspace>` on every command. Check `spoq --version`, `spoq doctor`, and `spoq workflow --help`; version alone does not establish strategy support.
 If inherited `SPOQ_STORE` selects a legacy backend, set it to `sqlite` only for
 these processes. Do not change the user's global configuration.
 
 In the source checkout, use `uv run --project code/mcp/spoq-server spoq ...`.
 Otherwise, if no installed 1.x CLI works and uv is available, try
-`uv tool run --from 'spoq>=1,<2' spoq ...` and verify the resolved version.
+`uv tool run --from 'spoq>=1.1,<2' spoq ...` and verify the resolved version.
 If no usable runtime is obtainable, report the missing prerequisite honestly.
 Creation initializes an empty store; no MCP restart is required.
 
@@ -58,3 +58,21 @@ Input has exactly the stage's ten named `scores` (numbers 0–100) and boolean
 `checks_passed`; output is the computed gate report. Exit 0 means PASS, 1 FAIL,
 2 invalid input. This checks arithmetic and thresholds; it does not perform the
 review or prove the evidence. Keep reports even on failure.
+
+## Existing SQLite upgrades
+
+Read `spoq_workflow_capabilities` or `spoq workflow upgrade --dry-run --root
+<workspace>` before opening a schema-1 store for workflow writes. Show the backup
+and schema preview, then use prior authorization or obtain confirmation once.
+`spoq_upgrade_workflow(confirmed=true)` or `spoq workflow upgrade --yes --root
+<workspace>` performs the consistent backup and upgrade. `spoq init --upgrade`
+also prompts; noninteractive clients use --yes only with authorization. Legacy
+Markdown conversion produces the current schema in one authorized conversion.
+Older binaries reject newer schemas; restoration requires a clean destination.
+
+Managed skill updates archive replaced entrypoints/resources under
+`.spoq/legacy-managed-skills/` and UI metadata under
+`.spoq/legacy-skill-metadata/`. Custom siblings, invocation policy and unrelated
+dependencies remain. Prior customized managed bytes are retained for review; they
+are not automatically merged into new procedural instructions. Identical
+reinstallation does not create duplicate backups or overwrite unchanged files.

@@ -66,3 +66,19 @@ Report saved IDs, task/wave counts, assumptions, and the planning gate's verdict
 and journal ID. A direct planning-only call can continue later with
 `/spoq <saved-id>`. When root SPOQ invoked this stage, hand the same IDs and gate
 evidence back so it can continue immediately. This stage never implements code.
+
+## Strategy invocation
+
+When dispatched by a saved strategy, read `../spoq/references/workflows.md` and
+retain the supplied run/scope/phase/attempt IDs, input hashes and phase lease.
+Do not create another run or recursively dispatch the root flow. Direct invocation
+without a workflow envelope keeps this stage independently usable.
+
+For PIQARD, an actual revision-bound narrative approval must precede decomposition;
+never infer it from an agent message. A direct PIQARD planning-only request uses
+the strategy driver through planning validation, then pauses before execution.
+During an existing plan phase, save the intended root metadata and child DAGs
+without changing the user's goal. Read the current specification before completion
+and follow the explicit planning-refresh contract. Return a project_plan JSON
+artifact linking scope/specification and the planning journal IDs. This stage
+never implements code, even when another stage may run afterward.

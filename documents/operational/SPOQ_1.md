@@ -62,3 +62,38 @@ native client scaffolding, CLI behavior, and real stdio MCP communication.
 in an isolated environment. Live Codex and Claude scripts are optional because
 they need installed, authenticated clients; documentation and protocol checks
 do not substitute for a live model run.
+
+
+## SPOQ 1.1 strategies and progress
+
+The authoritative hierarchy remains Project Plan → Feature → Task, with one work
+DAG per level. A saved strategy graph is separate: Classic has plan, planning
+validation, execution and implementation validation. Compact Classic preserves
+both gates. PIQARD records discovery and selected design sources, builds a
+narrative plan and requires a user decision on its exact artifact ID/hash before
+decomposing the work. Design may include Mermaid/ERDs, algorithm definitions or
+supplied formal records; the server does not run a theorem prover.
+
+Use `/spoq <goal-or-saved-id>` in your coding client (`$spoq` in Codex) to execute
+saved state. Planning-only `/spoq-plan` stops at planning validation. The coding
+client executes skills and observed checks; the server does not host a model.
+
+```bash
+spoq workflow list --root /path/to/project
+spoq workflow inspect RUN_ID --root /path/to/project
+spoq ui --root /path/to/project --run RUN_ID --no-open
+```
+
+Use an actual RUN_ID. The loopback viewer is read-only, bundled and needs no Node
+runtime. Task claims and phase leases are separate; renewing one does not renew
+the other. Stable operation keys deduplicate identical actions. Attempt/transition
+budgets persist across resume; polling or restarting does not reset exhaustion.
+A user decision cannot be supplied by a peer message or elapsed waiting time.
+
+For schema1 stores, run `spoq workflow upgrade --root /path/to/project --dry-run`,
+review the preview, then confirm with `--yes`. It creates a consistent schema1
+backup before schema2. Old binaries reject schema2; use a separate clean restore
+destination for rollback. `spoq init --upgrade --target /path/to/project` refreshes
+native client skills and MCP registration, preserving existing client detection.
+Reload running clients afterwards. Legacy maps/epics still have their separate
+conversion preview and original source backups.

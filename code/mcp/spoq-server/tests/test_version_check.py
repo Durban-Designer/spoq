@@ -92,6 +92,21 @@ def test_detects_current_version():
     assert result.error is None
 
 
+@pytest.mark.parametrize('published,expected', [('1.0.0', False), ('1.2.0', True), (None, False), ('', False)])
+def test_candidate_feed_only_recommends_a_verified_published_release(published, expected):
+    """Source bumps and an explicit unknown publication cannot trigger upgrades."""
+    with (
+        patch('spoq_server.version_check.__version__', '1.0.0'),
+        patch('spoq_server.version_check.urllib.request.urlopen', return_value=_mock_urlopen({
+            'version': '1.1.0', 'publishedVersion': published, 'publicationStatus': 'candidate',
+        })),
+    ):
+        result = check_version()
+    assert result.is_outdated is expected
+    assert result.remote_version == (published or '')
+    assert result.error is None
+
+
 def test_handles_network_failure():
     """Network errors are captured, not raised."""
     with patch(
